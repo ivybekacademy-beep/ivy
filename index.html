@@ -13,11 +13,9 @@
 <meta name="theme-color" content="#2C5FF2">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23EFFF33'/%3E%3Ctext%20x='32'%20y='46'%20font-family='Arial Black,Arial,sans-serif'%20font-size='32'%20font-weight='900'%20text-anchor='middle'%20fill='%230B0B0D'%3Eiv%3C/text%3E%3C/svg%3E">
 
-<!-- Archivo — o'zimizda (eski saytdagi fayl), Poppins — Google Fonts -->
+<!-- Barcha shriftlar o'zimizda — tashqi CSS yo'q, birinchi otrisovka tezroq -->
 <link rel="preload" href="archivo.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="poppins-400.woff2" as="font" type="font/woff2" crossorigin>
 
 <!-- Meta Pixel + Telegram Pixel (eski saytdan o'zgarishsiz — pixel ID'lar kabinetga bog'liq) -->
 <script>
@@ -41,6 +39,10 @@ src="https://www.facebook.com/tr?id=2283622125504650&ev=PageView&noscript=1"
 /></noscript>
 
 <style>
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(poppins-400.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(poppins-500.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url(poppins-600.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url(poppins-700.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{
   font-family:'Archivo';
   font-style:normal;
@@ -590,6 +592,14 @@ document.getElementById('leadForm').addEventListener('submit', (e) => {
   post(payload('lead')).then(showFinal);
   setTimeout(showFinal, 2500);
 });
+
+/* Karusel ekranda bo'lmaganda animatsiya to'xtaydi — CPU va batareya tejaladi */
+const mqTrack = document.querySelector('.marquee-track');
+if(mqTrack && 'IntersectionObserver' in window){
+  new IntersectionObserver((entries) => {
+    mqTrack.style.animationPlayState = entries[0].isIntersecting ? 'running' : 'paused';
+  }).observe(mqTrack);
+}
 </script>
 </body>
 </html>
