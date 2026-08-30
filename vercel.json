@@ -1,0 +1,60 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "ivybek.vercel.app"
+        }
+      ],
+      "destination": "https://ivy.uz/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/admissions-ig",
+      "destination": "/?utm_source=ig_ivy&utm_medium=bio",
+      "permanent": false
+    },
+    {
+      "source": "/admissions-lev",
+      "destination": "/?utm_source=ig_lev&utm_medium=bio",
+      "permanent": false
+    },
+    {
+      "source": "/admissions-fb",
+      "destination": "/?utm_source=fb&utm_medium=leads",
+      "permanent": false
+    },
+    {
+      "source": "/admissions-yt",
+      "destination": "/?utm_source=yt&utm_medium=leads",
+      "permanent": false
+    },
+    {
+      "source": "/admissions-tg",
+      "destination": "/?utm_source=tg&utm_medium=bio",
+      "permanent": false
+    },
+    {
+      "source": "/admissions-tgads",
+      "destination": "/?utm_source=tg_ads&utm_medium=cpc",
+      "permanent": false
+    },
+    {
+      "source": "/admissions-google",
+      "destination": "/?utm_source=google&utm_medium=cpc",
+      "permanent": false
+    },
+    {
+      "source": "/en",
+      "destination": "/en.html?utm_source=tg&utm_medium=bio",
+      "permanent": false
+    },
+    {
+      "source": "/admissions-eng",
+      "destination": "/en.html?utm_source=tg&utm_medium=bio",
+      "permanent": false
+    }
+  ]
+}
