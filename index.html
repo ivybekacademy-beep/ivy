@@ -354,10 +354,6 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
       <div class="scard" id="rejectCard">
         <h2>Afsuski, hozircha mos kelmaysiz</h2>
         <p>Admission dasturimizga 9-sinfdan boshlab, IELTS 6.5+ yoki SAT 1200+ natija bilan qabul qilamiz. Tayyor bo'lganingizda qayta ariza qoldiring — Instagram'da kuzatib boring!</p>
-        <div class="row">
-          <a class="btn-tg" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Instagram'da kuzatish</a>
-          <button type="button" class="btn-ig" id="backToForm" style="cursor:pointer;font-family:inherit;">← Javoblarni o'zgartirish</button>
-        </div>
       </div>
     </div>
   </div>
@@ -670,13 +666,6 @@ document.getElementById('leadForm').addEventListener('submit', (e) => {
 
   post(payload('lead')).then(showFinal);
   setTimeout(showFinal, 2500);
-});
-
-/* Rad javobidan formaga qaytish — javoblar saqlanadi, o'zgartirib qayta yuborsa bo'ladi */
-document.getElementById('backToForm').addEventListener('click', () => {
-  document.getElementById('rejectCard').classList.remove('on');
-  document.getElementById('leadForm').style.display = '';
-  document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
 });
 
 /* Karusel ekranda bo'lmaganda animatsiya to'xtaydi — CPU va batareya tejaladi */
