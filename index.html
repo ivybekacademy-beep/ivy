@@ -447,6 +447,12 @@ function formatPhone(d){
 function phoneOk(d){
   return d.startsWith('998') ? d.length === 12 : (d.length >= 10 && d.length <= 15);
 }
+/* 9 raqam = kodsiz o'zbek raqami; 0 bilan boshlangan 10 raqam ham shu */
+function fixLocal(d){
+  if(d.length === 9 && !d.startsWith('998')) return '998' + d;
+  if(d.length === 10 && d[0] === '0') return '998' + d.slice(1);
+  return d;
+}
 
 const nameEl = document.getElementById('fName');
 const phoneEl = document.getElementById('fPhone');
@@ -455,6 +461,12 @@ const ieltsEl = document.getElementById('fIelts');
 const satEl = document.getElementById('fSat');
 
 phoneEl.addEventListener('focus', () => { if(!phoneEl.value) phoneEl.value = '+998 '; });
+/* Maydondan chiqishda ham tuzatamiz — hodisa-evristika o'tkazib yuborgan bo'lsa ham */
+phoneEl.addEventListener('blur', () => {
+  const d = fixLocal(phoneEl.value.replace(/\D/g,''));
+  phoneEl.value = d ? formatPhone(d) : '';
+  prevPhoneDigits = d;
+});
 let prevPhoneDigits = '';
 phoneEl.addEventListener('input', (e) => {
   let d = phoneEl.value.replace(/\D/g,'');
@@ -462,10 +474,7 @@ phoneEl.addEventListener('input', (e) => {
      ba'zan esa maydonni kodsiz kontakt bilan BUTUNLAY almashtiradi (9 raqam qoladi). */
   while(d.startsWith('998998')) d = d.slice(3);
   const bigInsert = d.length - prevPhoneDigits.length >= 4 || /insertReplacement|Paste/i.test(e.inputType || '');
-  if(bigInsert){
-    if(d.length === 9) d = '998' + d;                       // kontakt kodsiz saqlangan
-    else if(d.length === 10 && d[0] === '0') d = '998' + d.slice(1);
-  }
+  if(bigInsert) d = fixLocal(d);
   d = d.slice(0,15);
   prevPhoneDigits = d;
   phoneEl.value = formatPhone(d);
@@ -528,7 +537,7 @@ function currentAnswers(){
 
 function payload(type){
   const a = currentAnswers();
-  const digits = phoneEl.value.replace(/\D/g,'');
+  const digits = fixLocal(phoneEl.value.replace(/\D/g,''));
   const g = grade(a);
   return {
     type, sessionId,
@@ -558,7 +567,7 @@ let finalShown = false;
 function showFinal(){
   if(finalShown) return;
   finalShown = true;
-  const digits = phoneEl.value.replace(/\D/g,'');
+  const digits = fixLocal(phoneEl.value.replace(/\D/g,''));
   document.getElementById('succPhone').textContent = digits ? formatPhone(digits) : "ko'rsatilgan raqam";
   document.getElementById('leadForm').style.display = 'none';
   document.getElementById('successCard').classList.add('on');
@@ -574,7 +583,8 @@ document.getElementById('leadForm').addEventListener('submit', (e) => {
     document.getElementById('eName').classList.add('on');
     ok = false;
   }
-  const digits = phoneEl.value.replace(/\D/g,'');
+  const digits = fixLocal(phoneEl.value.replace(/\D/g,''));
+  if(digits !== phoneEl.value.replace(/\D/g,'')) phoneEl.value = formatPhone(digits);
   if(!phoneOk(digits)){
     phoneEl.classList.add('invalid');
     document.getElementById('ePhone').classList.add('on');

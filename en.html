@@ -694,6 +694,12 @@ function formatPhone(d){
 function phoneOk(d){
   return d.startsWith('998') ? d.length === 12 : (d.length >= 10 && d.length <= 15);
 }
+/* 9 digits = Uzbek number saved without country code; 10 with leading 0 — same */
+function fixLocal(d){
+  if(d.length === 9 && !d.startsWith('998')) return '998' + d;
+  if(d.length === 10 && d[0] === '0') return '998' + d.slice(1);
+  return d;
+}
 
 /* ============================================================
    RENDER
@@ -839,15 +845,17 @@ function renderContact(){
     let d = phone.value.replace(/\D/g,'');
     while(d.startsWith('998998')) d = d.slice(3);  // autofill doubles the prefilled country code
     const bigInsert = d.length - prevPhoneDigits.length >= 4 || /insertReplacement|Paste/i.test(e.inputType || '');
-    if(bigInsert){
-      if(d.length === 9) d = '998' + d;            // contact saved without country code
-      else if(d.length === 10 && d[0] === '0') d = '998' + d.slice(1);
-    }
+    if(bigInsert) d = fixLocal(d);
     d = d.slice(0,15);
     prevPhoneDigits = d;
     phone.value = formatPhone(d);
     phone.classList.remove('invalid');
     document.getElementById('ePhone').classList.remove('on');
+  });
+  phone.addEventListener('blur', () => {
+    const d = fixLocal(phone.value.replace(/\D/g,''));
+    phone.value = d ? formatPhone(d) : '';
+    prevPhoneDigits = d;
   });
   const tg = document.getElementById('fTg');
   tg.addEventListener('input', () => { tg.value = tg.value.replace(/@/g,''); });  // @ prefiks avtomatik, ikkinchisini olib tashlaymiz
@@ -940,7 +948,8 @@ function submit(){
     document.getElementById('eName').classList.add('on');
     ok = false;
   }
-  const digits = phone.value.replace(/\D/g,'');
+  const digits = fixLocal(phone.value.replace(/\D/g,''));
+  if(digits !== phone.value.replace(/\D/g,'')) phone.value = formatPhone(digits);
   if(!phoneOk(digits)){
     phone.classList.add('invalid');
     document.getElementById('ePhone').classList.add('on');
