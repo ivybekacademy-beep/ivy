@@ -311,18 +311,20 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
             <label class="field">
               <span class="lbl">IELTS ball</span>
               <select class="input" id="fIelts">
-                <option value="" selected>Tanlang</option>
+                <option value="" disabled selected>Tanlang</option>
                 <option value="Yo'q">Hali yo'q</option>
                 <option value="5.0-5.5">5.0 – 5.5</option>
-                <option value="6.0-6.5">6.0 – 6.5</option>
+                <option value="6.0">6.0</option>
+                <option value="6.5">6.5</option>
                 <option value="7.0-7.5">7.0 – 7.5</option>
                 <option value="8.0+">8.0+</option>
               </select>
+              <span class="err" id="eIelts">IELTS holatingizni tanlang</span>
             </label>
             <label class="field">
               <span class="lbl">SAT ball</span>
               <select class="input" id="fSat">
-                <option value="" selected>Tanlang</option>
+                <option value="" disabled selected>Tanlang</option>
                 <option value="Yo'q">Hali yo'q</option>
                 <option value="1000-1190">1000 – 1190</option>
                 <option value="1200-1290">1200 – 1290</option>
@@ -330,6 +332,7 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
                 <option value="1400-1490">1400 – 1490</option>
                 <option value="1500+">1500+</option>
               </select>
+              <span class="err" id="eSat">SAT holatingizni tanlang</span>
             </label>
           </div>
 
@@ -345,6 +348,15 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
         <div class="row">
           <a class="btn-tg" href="https://t.me/ivybek_asadbek" target="_blank" rel="noopener">Telegramda yozish</a>
           <a class="btn-ig" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Instagram'da natijalar</a>
+        </div>
+      </div>
+
+      <div class="scard" id="rejectCard">
+        <h2>Afsuski, hozircha mos kelmaysiz</h2>
+        <p>Admission dasturimizga 9-sinfdan boshlab, IELTS 6.5+ yoki SAT 1200+ natija bilan qabul qilamiz. Tayyor bo'lganingizda qayta ariza qoldiring — Instagram'da kuzatib boring!</p>
+        <div class="row">
+          <a class="btn-tg" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Instagram'da kuzatish</a>
+          <button type="button" class="btn-ig" id="backToForm" style="cursor:pointer;font-family:inherit;">← Javoblarni o'zgartirish</button>
         </div>
       </div>
     </div>
@@ -489,6 +501,14 @@ sinfEl.addEventListener('change', () => {
   sinfEl.classList.remove('invalid');
   document.getElementById('eSinf').classList.remove('on');
 });
+ieltsEl.addEventListener('change', () => {
+  ieltsEl.classList.remove('invalid');
+  document.getElementById('eIelts').classList.remove('on');
+});
+satEl.addEventListener('change', () => {
+  satEl.classList.remove('invalid');
+  document.getElementById('eSat').classList.remove('on');
+});
 
 /* Birinchi interaktsiya: Meta InitiateCheckout + partial yozuv */
 let formStarted = false;
@@ -513,7 +533,8 @@ function grade(a){
 
   if(a.ingliz === '8.0+') score += 35;
   else if(a.ingliz === '7.0-7.5') score += 32;
-  else if(a.ingliz === '6.0-6.5') score += 26;
+  else if(a.ingliz === '6.5') score += 26;
+  else if(a.ingliz === '6.0') score += 14;
   else if(a.ingliz === '5.0-5.5') score += 14;
 
   if(a.sat === '1500+' || a.sat === '1400-1490' || a.sat === '1300-1390' || a.sat === '1200-1290') score += 25;
@@ -521,6 +542,14 @@ function grade(a){
 
   const tier = score >= 70 ? 'HOT' : score >= 45 ? 'WARM' : 'NURTURE';
   return { score, tier };
+}
+
+/* Lead filtri (eski formadagi mantiq): 9-sinfdan boshlab hammasi ro'yxatda,
+   ingliz zaif bo'lsa (Yo'q / 5.0-5.5 / 6.0) — faqat SAT 1200+ qutqaradi. */
+function disqualify(a){
+  const weakEnglish = a.ingliz === "Yo'q" || a.ingliz === '5.0-5.5' || a.ingliz === '6.0';
+  const satRescue = a.sat === '1200-1290' || a.sat === '1300-1390' || a.sat === '1400-1490' || a.sat === '1500+';
+  return weakEnglish && !satRescue;
 }
 
 /* ============================================================
@@ -595,9 +624,29 @@ document.getElementById('leadForm').addEventListener('submit', (e) => {
     document.getElementById('eSinf').classList.add('on');
     ok = false;
   }
+  if(!ieltsEl.value){
+    ieltsEl.classList.add('invalid');
+    document.getElementById('eIelts').classList.add('on');
+    ok = false;
+  }
+  if(!satEl.value){
+    satEl.classList.add('invalid');
+    document.getElementById('eSat').classList.add('on');
+    ok = false;
+  }
   if(!ok){
     const bad = document.querySelector('.input.invalid');
     if(bad) bad.focus();
+    return;
+  }
+
+  /* Filtr: mos kelmaganlar jadvalga "screened" bo'lib tushadi —
+     amoCRM, bot va Lead pikseli ishlamaydi (Meta sifatli lidlarda o'qiydi) */
+  if(disqualify(currentAnswers())){
+    post(payload('screened'));
+    document.getElementById('leadForm').style.display = 'none';
+    document.getElementById('rejectCard').classList.add('on');
+    document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
     return;
   }
 
@@ -621,6 +670,13 @@ document.getElementById('leadForm').addEventListener('submit', (e) => {
 
   post(payload('lead')).then(showFinal);
   setTimeout(showFinal, 2500);
+});
+
+/* Rad javobidan formaga qaytish — javoblar saqlanadi, o'zgartirib qayta yuborsa bo'ladi */
+document.getElementById('backToForm').addEventListener('click', () => {
+  document.getElementById('rejectCard').classList.remove('on');
+  document.getElementById('leadForm').style.display = '';
+  document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
 });
 
 /* Karusel ekranda bo'lmaganda animatsiya to'xtaydi — CPU va batareya tejaladi */
