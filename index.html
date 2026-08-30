@@ -172,7 +172,7 @@ input[type=tel].input{letter-spacing:0.02em;}
   box-shadow:0 28px 60px -30px rgba(11,20,60,0.55);
 }
 .scard.on{display:block;}
-.scard .stamp{
+.stamp{
   display:inline-block;background:#EFFF33;color:#0B0B0D;
   padding:7px 14px;transform:rotate(-1.2deg);
   font-family:'Archivo',sans-serif;font-weight:900;font-size:14px;
@@ -302,14 +302,6 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
           </label>
 
           <label class="field">
-            <span class="lbl">Telegram username <span style="text-transform:none;letter-spacing:0;opacity:.7;font-weight:500;">— tavsiya etiladi</span></span>
-            <div class="tg-row">
-              <span class="tg-pre">@</span>
-              <input class="input" id="fTg" type="text" autocomplete="off" autocapitalize="none" placeholder="username">
-            </div>
-          </label>
-
-          <label class="field">
             <span class="lbl">Sinf</span>
             <select class="input" id="fSinf">
               <option value="" disabled selected>Tanlang</option>
@@ -322,6 +314,17 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
             <span class="err" id="eSinf">Sinfingizni tanlang</span>
           </label>
 
+          <button class="submit" id="sendBtn" type="submit">Bepul qabul diagnostikasini oling →</button>
+          <p class="privacy">Tugmani bosish orqali shaxsiy ma'lumotlaringizni qayta ishlashga rozilik bildirasiz. Raqamingizni faqat konsultatsiya uchun ishlatamiz.</p>
+        </div>
+      </form>
+
+      <div class="fcard" id="quizCard" style="display:none;">
+        <div class="stamp" style="margin-bottom:14px;">Ariza qabul qilindi ✓</div>
+        <h2>Oxirgi qadam — 2 savol</h2>
+        <p class="lead">Javoblaringiz asosida sizga aniqroq tahlil tayyorlaymiz (30 soniya).</p>
+
+        <div class="fields">
           <div class="two-col">
             <label class="field">
               <span class="lbl">IELTS ball</span>
@@ -351,10 +354,18 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
             </label>
           </div>
 
-          <button class="submit" id="sendBtn" type="submit">Bepul qabul diagnostikasini oling →</button>
-          <p class="privacy">Tugmani bosish orqali shaxsiy ma'lumotlaringizni qayta ishlashga rozilik bildirasiz. Raqamingizni faqat konsultatsiya uchun ishlatamiz.</p>
+          <label class="field">
+            <span class="lbl">Telegram username <span style="text-transform:none;letter-spacing:0;opacity:.7;font-weight:500;">— tavsiya etiladi</span></span>
+            <div class="tg-row">
+              <span class="tg-pre">@</span>
+              <input class="input" id="fTg" type="text" autocomplete="off" autocapitalize="none" placeholder="username">
+            </div>
+          </label>
+
+          <button class="submit" id="quizBtn" type="button">Yakunlash →</button>
+          <p class="privacy"><a href="#" id="skipQuiz" style="color:#8A90A3;text-decoration:underline;">O'tkazib yuborish</a></p>
         </div>
-      </form>
+      </div>
 
       <div class="scard" id="successCard">
         <div class="stamp">Ariza qabul qilindi ✓</div>
@@ -364,11 +375,6 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
           <a class="btn-tg" href="https://t.me/ivybek_asadbek" target="_blank" rel="noopener">Telegramda yozish</a>
           <a class="btn-ig" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Instagram'da natijalar</a>
         </div>
-      </div>
-
-      <div class="scard" id="rejectCard">
-        <h2>Afsuski, ro'yxatdan o'ta olmadingiz</h2>
-        <p>Admission dasturimizga 9-sinfdan boshlab, IELTS 7+ yoki SAT 1200+ natija bilan qabul qilamiz. Tayyor bo'lganingizda qayta ariza qoldiring — Instagram'da kuzatib boring</p>
       </div>
     </div>
   </div>
@@ -558,13 +564,8 @@ function grade(a){
   return { score, tier };
 }
 
-/* Lead filtri: o'tish chegarasi IELTS 7+ yoki SAT 1200+ (rad ekranidagi matnga mos).
-   Ingliz 6.5 va undan past bo'lsa — faqat SAT 1200+ qutqaradi. */
-function disqualify(a){
-  const weakEnglish = a.ingliz === "Yo'q" || a.ingliz === '5.0-5.5' || a.ingliz === '6.0' || a.ingliz === '6.5';
-  const satRescue = a.sat === '1200-1290' || a.sat === '1300-1390' || a.sat === '1400-1490' || a.sat === '1500+';
-  return weakEnglish && !satRescue;
-}
+/* Ikki qadamli forma: 1-qadam kontakt (lid darhol ketadi),
+   2-qadam IELTS/SAT/Telegram — javoblar jadvaldagi shu qatorga qo'shiladi. */
 
 /* ============================================================
    SEND (Apps Script kontrakti: HEADERS bilan bir xil kalitlar)
@@ -606,6 +607,15 @@ function post(data){
 /* ============================================================
    SUBMIT
    ============================================================ */
+let quizShown = false;
+function showQuiz(){
+  if(quizShown) return;
+  quizShown = true;
+  document.getElementById('leadForm').style.display = 'none';
+  document.getElementById('quizCard').style.display = '';
+  document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
 let finalShown = false;
 function showFinal(){
   if(finalShown) return;
@@ -613,9 +623,32 @@ function showFinal(){
   const digits = fixLocal(phoneEl.value.replace(/\D/g,''));
   document.getElementById('succPhone').textContent = digits ? formatPhone(digits) : "ko'rsatilgan raqam";
   document.getElementById('leadForm').style.display = 'none';
+  document.getElementById('quizCard').style.display = 'none';
   document.getElementById('successCard').classList.add('on');
   document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
+
+/* 2-qadam: quiz yakunlash yoki o'tkazib yuborish */
+document.getElementById('quizBtn').addEventListener('click', () => {
+  let ok = true;
+  if(!ieltsEl.value){
+    ieltsEl.classList.add('invalid');
+    document.getElementById('eIelts').classList.add('on');
+    ok = false;
+  }
+  if(!satEl.value){
+    satEl.classList.add('invalid');
+    document.getElementById('eSat').classList.add('on');
+    ok = false;
+  }
+  if(!ok) return;
+  post(payload('quiz'));   // xuddi shu sessionId — jadvaldagi qator to'ldiriladi
+  showFinal();
+});
+document.getElementById('skipQuiz').addEventListener('click', (e) => {
+  e.preventDefault();
+  showFinal();
+});
 
 document.getElementById('leadForm').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -638,29 +671,9 @@ document.getElementById('leadForm').addEventListener('submit', (e) => {
     document.getElementById('eSinf').classList.add('on');
     ok = false;
   }
-  if(!ieltsEl.value){
-    ieltsEl.classList.add('invalid');
-    document.getElementById('eIelts').classList.add('on');
-    ok = false;
-  }
-  if(!satEl.value){
-    satEl.classList.add('invalid');
-    document.getElementById('eSat').classList.add('on');
-    ok = false;
-  }
   if(!ok){
     const bad = document.querySelector('.input.invalid');
     if(bad) bad.focus();
-    return;
-  }
-
-  /* Filtr: mos kelmaganlar jadvalga "screened" bo'lib tushadi —
-     amoCRM, bot va Lead pikseli ishlamaydi (Meta sifatli lidlarda o'qiydi) */
-  if(disqualify(currentAnswers())){
-    post(payload('screened'));
-    document.getElementById('leadForm').style.display = 'none';
-    document.getElementById('rejectCard').classList.add('on');
-    document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
     return;
   }
 
@@ -682,8 +695,8 @@ document.getElementById('leadForm').addEventListener('submit', (e) => {
   }
   if(typeof tgp === 'function') tgp('event', '4HGABMb6-Ix8DtlHR'); /* Telegram Ads: Lead */
 
-  post(payload('lead')).then(showFinal);
-  setTimeout(showFinal, 2500);
+  post(payload('lead')).then(showQuiz);
+  setTimeout(showQuiz, 2500);
 });
 
 /* Karusel ekranda bo'lmaganda animatsiya to'xtaydi — CPU va batareya tejaladi */
