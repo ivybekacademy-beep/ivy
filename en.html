@@ -692,7 +692,7 @@ function formatPhone(d){
   return d.replace(/(\d{3})(?=\d)/g, '$1 ');
 }
 function phoneOk(d){
-  return d.startsWith('998') ? d.length === 12 : (d.length >= 8 && d.length <= 15);
+  return d.startsWith('998') ? d.length === 12 : (d.length >= 10 && d.length <= 15);
 }
 
 /* ============================================================
@@ -834,10 +834,17 @@ function renderContact(){
     <p class="note">Your details stay private.</p>`;
 
   const phone = document.getElementById('fPhone');
-  phone.addEventListener('input', () => {
+  let prevPhoneDigits = '';
+  phone.addEventListener('input', (e) => {
     let d = phone.value.replace(/\D/g,'');
     while(d.startsWith('998998')) d = d.slice(3);  // autofill doubles the prefilled country code
+    const bigInsert = d.length - prevPhoneDigits.length >= 4 || /insertReplacement|Paste/i.test(e.inputType || '');
+    if(bigInsert){
+      if(d.length === 9) d = '998' + d;            // contact saved without country code
+      else if(d.length === 10 && d[0] === '0') d = '998' + d.slice(1);
+    }
     d = d.slice(0,15);
+    prevPhoneDigits = d;
     phone.value = formatPhone(d);
     phone.classList.remove('invalid');
     document.getElementById('ePhone').classList.remove('on');

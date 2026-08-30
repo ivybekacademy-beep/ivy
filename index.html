@@ -445,7 +445,7 @@ function formatPhone(d){
   return d ? '+' + d.replace(/(\d{3})(?=\d)/g, '$1 ') : '';
 }
 function phoneOk(d){
-  return d.startsWith('998') ? d.length === 12 : (d.length >= 8 && d.length <= 15);
+  return d.startsWith('998') ? d.length === 12 : (d.length >= 10 && d.length <= 15);
 }
 
 const nameEl = document.getElementById('fName');
@@ -455,12 +455,19 @@ const ieltsEl = document.getElementById('fIelts');
 const satEl = document.getElementById('fSat');
 
 phoneEl.addEventListener('focus', () => { if(!phoneEl.value) phoneEl.value = '+998 '; });
-phoneEl.addEventListener('input', () => {
+let prevPhoneDigits = '';
+phoneEl.addEventListener('input', (e) => {
   let d = phoneEl.value.replace(/\D/g,'');
-  /* iOS/Android avtoto'ldirish "+998 " prefiksga to'liq raqamni QO'SHIB yuboradi —
-     davlat kodi ikkilanadi (998998...). Takrorlangan kodni yig'ishtiramiz. */
+  /* Avtoto'ldirish ba'zan "+998 " ustiga to'liq raqam QO'SHADI (kod ikkilanadi),
+     ba'zan esa maydonni kodsiz kontakt bilan BUTUNLAY almashtiradi (9 raqam qoladi). */
   while(d.startsWith('998998')) d = d.slice(3);
+  const bigInsert = d.length - prevPhoneDigits.length >= 4 || /insertReplacement|Paste/i.test(e.inputType || '');
+  if(bigInsert){
+    if(d.length === 9) d = '998' + d;                       // kontakt kodsiz saqlangan
+    else if(d.length === 10 && d[0] === '0') d = '998' + d.slice(1);
+  }
   d = d.slice(0,15);
+  prevPhoneDigits = d;
   phoneEl.value = formatPhone(d);
   phoneEl.classList.remove('invalid');
   document.getElementById('ePhone').classList.remove('on');
