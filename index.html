@@ -376,6 +376,11 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
           <a class="btn-ig" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Instagram'da natijalar</a>
         </div>
       </div>
+
+      <div class="scard" id="rejectCard">
+        <h2>Afsuski, ro'yxatdan o'ta olmadingiz</h2>
+        <p>Admission dasturimizga 9-sinfdan boshlab, IELTS 7+ yoki SAT 1200+ natija bilan qabul qilamiz. Tayyor bo'lganingizda qayta ariza qoldiring — Instagram'da kuzatib boring</p>
+      </div>
     </div>
   </div>
 </section>
@@ -564,8 +569,15 @@ function grade(a){
   return { score, tier };
 }
 
-/* Ikki qadamli forma: 1-qadam kontakt (lid darhol ketadi),
-   2-qadam IELTS/SAT/Telegram — javoblar jadvaldagi shu qatorga qo'shiladi. */
+/* Ikki qadamli forma + filtr:
+   1-qadam kontakt (jadvalga partial yoziladi),
+   2-qadam IELTS/SAT — filtrdan o'tsa yoki skip qilsa LEAD ketadi (CRM/bot/piksel),
+   o'tmasa — screened (faqat jadval) va rad ekrani. */
+function disqualify(a){
+  const weakEnglish = a.ingliz === "Yo'q" || a.ingliz === '5.0-5.5' || a.ingliz === '6.0' || a.ingliz === '6.5';
+  const satRescue = a.sat === '1200-1290' || a.sat === '1300-1390' || a.sat === '1400-1490' || a.sat === '1500+';
+  return weakEnglish && !satRescue;
+}
 
 /* ============================================================
    SEND (Apps Script kontrakti: HEADERS bilan bir xil kalitlar)
@@ -628,7 +640,36 @@ function showFinal(){
   document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
-/* 2-qadam: quiz yakunlash yoki o'tkazib yuborish */
+/* Lead yuborish — filtrdan o'tganlar va skip qilganlar uchun.
+   eventID = sessionId (CAPI bilan dedup), value = lid sifati. */
+let leadSent = false;
+function sendLead(){
+  if(leadSent) return;
+  leadSent = true;
+  const btn = document.getElementById('quizBtn');
+  btn.disabled = true;
+  btn.textContent = 'Yuborilmoqda...';
+  if(typeof fbq === 'function'){
+    const g = grade(currentAnswers());
+    fbq('track', 'Lead', { value: g.score, currency: 'USD' }, { eventID: sessionId });
+  }
+  if(typeof tgp === 'function') tgp('event', '4HGABMb6-Ix8DtlHR'); /* Telegram Ads: Lead */
+  post(payload('lead')).then(showFinal);
+  setTimeout(showFinal, 2500);
+}
+
+let rejectShown = false;
+function showReject(){
+  if(rejectShown || finalShown) return;
+  rejectShown = true;
+  post(payload('screened'));   // jadvalga tushadi, CRM/bot/pikselga emas
+  document.getElementById('leadForm').style.display = 'none';
+  document.getElementById('quizCard').style.display = 'none';
+  document.getElementById('rejectCard').classList.add('on');
+  document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+/* 2-qadam: filtr → lead yoki rad; skip → lead (kvalifikatsiyani setter qiladi) */
 document.getElementById('quizBtn').addEventListener('click', () => {
   let ok = true;
   if(!ieltsEl.value){
@@ -642,12 +683,12 @@ document.getElementById('quizBtn').addEventListener('click', () => {
     ok = false;
   }
   if(!ok) return;
-  post(payload('quiz'));   // xuddi shu sessionId — jadvaldagi qator to'ldiriladi
-  showFinal();
+  if(disqualify(currentAnswers())) showReject();
+  else sendLead();
 });
 document.getElementById('skipQuiz').addEventListener('click', (e) => {
   e.preventDefault();
-  showFinal();
+  sendLead();
 });
 
 document.getElementById('leadForm').addEventListener('submit', (e) => {
@@ -677,26 +718,16 @@ document.getElementById('leadForm').addEventListener('submit', (e) => {
     return;
   }
 
-  const btn = document.getElementById('sendBtn');
-  btn.disabled = true;
-  btn.textContent = 'Yuborilmoqda...';
-
+  /* 1-qadam: kontakt jadvalga yoziladi (partial), Advanced Matching yoqiladi.
+     Lead (CRM/bot/piksel) — 2-qadam filtridan keyin. */
   if(typeof fbq === 'function'){
-    /* Advanced Matching — piksel qiymatlarni brauzerda heshlaydi */
     const am = { ph: digits, country: 'uz' };
     const fn = nameEl.value.trim().split(/\s+/)[0].toLowerCase();
     if(fn) am.fn = fn;
     fbq('init', META_PIXEL_ID, am);
-
-    /* eventID = sessionId — Apps Script CAPI Lead'ni xuddi shu id bilan yuboradi,
-       Meta ikkalasini bitta hodisa deb sanaydi (dedup). value = lid sifati. */
-    const g = grade(currentAnswers());
-    fbq('track', 'Lead', { value: g.score, currency: 'USD' }, { eventID: sessionId });
   }
-  if(typeof tgp === 'function') tgp('event', '4HGABMb6-Ix8DtlHR'); /* Telegram Ads: Lead */
-
-  post(payload('lead')).then(showQuiz);
-  setTimeout(showQuiz, 2500);
+  post(payload('partial'));
+  showQuiz();
 });
 
 /* Karusel ekranda bo'lmaganda animatsiya to'xtaydi — CPU va batareya tejaladi */
