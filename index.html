@@ -203,20 +203,29 @@ input[type=tel].input{letter-spacing:0.02em;}
 /* ---------- Marquee ---------- */
 .results{max-width:1080px;width:100%;margin:0 auto;padding:clamp(32px,4vw,52px) 24px;}
 .marquee{
-  overflow:hidden;margin:0 -24px;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
-          mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
+  overflow:hidden;margin:0 -24px;position:relative;
 }
+/* Chekka tumanlash: og'ir CSS-mask o'rniga yengil gradient qatlamlar (mobil GPU uchun) */
+.marquee::before,.marquee::after{
+  content:"";position:absolute;top:0;bottom:0;width:clamp(24px,6vw,70px);
+  z-index:1;pointer-events:none;
+}
+.marquee::before{left:0;background:linear-gradient(90deg,#F2F1ED,rgba(242,241,237,0));}
+.marquee::after{right:0;background:linear-gradient(270deg,#F2F1ED,rgba(242,241,237,0));}
 .marquee-track{
   display:flex;gap:14px;width:max-content;padding:4px 7px;
   animation:ivmarquee 66s linear infinite;
+  will-change:transform;
 }
-.marquee:hover .marquee-track{animation-play-state:paused;}
+/* Pauza faqat haqiqiy hover'da (sichqoncha) — telefonda teginish lentani muzlatmasin */
+@media (hover:hover){
+  .marquee:hover .marquee-track{animation-play-state:paused;}
+}
 .marquee img{
   width:clamp(180px,20vw,240px);height:auto;flex:none;aspect-ratio:4/5;object-fit:cover;
   border-radius:14px;display:block;background:#2C5FF2;
 }
-@keyframes ivmarquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@keyframes ivmarquee{from{transform:translate3d(0,0,0);}to{transform:translate3d(-50%,0,0);}}
 @media (prefers-reduced-motion:reduce){
   .marquee{overflow-x:auto;}
   .marquee-track{animation:none;}
@@ -351,9 +360,9 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
 <section class="results">
   <div class="marquee">
     <div class="marquee-track">
-      <img src="uploads/01.webp" width="540" height="675" loading="lazy" decoding="async" alt="Tsinghua University — Top 15 worldwide">
-      <img src="uploads/1.webp" width="540" height="675" loading="lazy" decoding="async" alt="Ivybek o'quvchisi — qabul natijasi">
-      <img src="uploads/2.webp" width="540" height="675" loading="lazy" decoding="async" alt="Ivybek o'quvchisi — qabul natijasi">
+      <img src="uploads/01.webp" width="540" height="675" decoding="async" alt="Tsinghua University — Top 15 worldwide">
+      <img src="uploads/1.webp" width="540" height="675" decoding="async" alt="Ivybek o'quvchisi — qabul natijasi">
+      <img src="uploads/2.webp" width="540" height="675" decoding="async" alt="Ivybek o'quvchisi — qabul natijasi">
       <img src="uploads/10.webp" width="540" height="675" loading="lazy" decoding="async" alt="MIT — $385,000">
       <img src="uploads/4.webp" width="540" height="675" loading="lazy" decoding="async" alt="Carnegie Mellon University Qatar">
       <img src="uploads/11.webp" width="540" height="675" loading="lazy" decoding="async" alt="MIT — $385,000">
