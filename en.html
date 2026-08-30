@@ -719,7 +719,8 @@ function render(){
 function disqualify(){
   if(answers.sinf === 'Grade 1-8') return 'sinf';
   const noIelts = answers.ingliz === 'I do not speak English well' ||
-                  answers.ingliz === 'IELTS 6.0 or below';
+                  answers.ingliz === 'IELTS 6.0 or below' ||
+                  answers.ingliz === 'IELTS 6.5';
   if(noIelts && answers.sat !== 'Yes, 1200 or above') return 'tayyorgarlik';
   return null;
 }
@@ -729,8 +730,8 @@ function renderNotFit(reason){
   progBar.style.width = '100%';
   host.innerHTML = `
     <div class="final">
-      <h3>Unfortunately, you are not eligible yet</h3>
-      <p>We accept students from Grade 9 with IELTS 6.5+ or SAT 1200+. Apply again once you are ready &mdash; and follow us on Instagram in the meantime!</p>
+      <h3>Unfortunately, you didn't pass this time</h3>
+      <p>We accept students from Grade 9 with IELTS 7+ or SAT 1200+. Apply again once you are ready &mdash; and follow us on Instagram in the meantime!</p>
       <a class="btn btn-block" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Follow on Instagram</a>
       <div class="nav-row">
         <button type="button" class="btn btn-back" id="backBtn" aria-label="Back">

@@ -142,6 +142,13 @@ input[type=tel].input{letter-spacing:0.02em;}
 .input.invalid{border-color:#D42B2B;}
 .err{display:none;font-size:12.5px;color:#D42B2B;}
 .err.on{display:block;}
+.tg-row{display:flex;gap:8px;}
+.tg-row .input{flex:1;min-width:0;}
+.tg-pre{
+  flex:none;display:grid;place-items:center;padding:0 16px;
+  background:#F2F3F7;border:2px solid #F2F3F7;border-radius:10px;
+  font-size:15px;font-weight:700;color:#5A6172;
+}
 .two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:13px;}
 .submit{
   width:100%;margin-top:4px;padding:15px 20px;
@@ -295,6 +302,14 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
           </label>
 
           <label class="field">
+            <span class="lbl">Telegram username <span style="text-transform:none;letter-spacing:0;opacity:.7;font-weight:500;">— tavsiya etiladi</span></span>
+            <div class="tg-row">
+              <span class="tg-pre">@</span>
+              <input class="input" id="fTg" type="text" autocomplete="off" autocapitalize="none" placeholder="username">
+            </div>
+          </label>
+
+          <label class="field">
             <span class="lbl">Sinf</span>
             <select class="input" id="fSinf">
               <option value="" disabled selected>Tanlang</option>
@@ -344,7 +359,7 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
       <div class="scard" id="successCard">
         <div class="stamp">Ariza qabul qilindi ✓</div>
         <h2>Siz ro'yxatdasiz</h2>
-        <p>Jamoamiz <b id="succPhone"></b> orqali 24 soat ichida shaxsiy tahlil va keyingi qadamlarni yuboradi.</p>
+        <p>Jamoamiz <b id="succPhone"></b> shu raqamingizga tez orada bog'lanishadi</p>
         <div class="row">
           <a class="btn-tg" href="https://t.me/ivybek_asadbek" target="_blank" rel="noopener">Telegramda yozish</a>
           <a class="btn-ig" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Instagram'da natijalar</a>
@@ -352,8 +367,8 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
       </div>
 
       <div class="scard" id="rejectCard">
-        <h2>Afsuski, hozircha mos kelmaysiz</h2>
-        <p>Admission dasturimizga 9-sinfdan boshlab, IELTS 6.5+ yoki SAT 1200+ natija bilan qabul qilamiz. Tayyor bo'lganingizda qayta ariza qoldiring — Instagram'da kuzatib boring!</p>
+        <h2>Afsuski, ro'yxatdan o'ta olmadingiz</h2>
+        <p>Admission dasturimizga 9-sinfdan boshlab, IELTS 7+ yoki SAT 1200+ natija bilan qabul qilamiz. Tayyor bo'lganingizda qayta ariza qoldiring — Instagram'da kuzatib boring</p>
       </div>
     </div>
   </div>
@@ -464,9 +479,12 @@ function fixLocal(d){
 
 const nameEl = document.getElementById('fName');
 const phoneEl = document.getElementById('fPhone');
+const tgEl = document.getElementById('fTg');
 const sinfEl = document.getElementById('fSinf');
 const ieltsEl = document.getElementById('fIelts');
 const satEl = document.getElementById('fSat');
+
+tgEl.addEventListener('input', () => { tgEl.value = tgEl.value.replace(/@/g,'').replace(/\s/g,''); });
 
 phoneEl.addEventListener('focus', () => { if(!phoneEl.value) phoneEl.value = '+998 '; });
 /* Maydondan chiqishda ham tuzatamiz — hodisa-evristika o'tkazib yuborgan bo'lsa ham */
@@ -514,7 +532,7 @@ function markStarted(){
   if(typeof fbq === 'function') fbq('track', 'InitiateCheckout');
   post(payload('partial'));
 }
-[nameEl, phoneEl, sinfEl, ieltsEl, satEl].forEach(el => {
+[nameEl, phoneEl, tgEl, sinfEl, ieltsEl, satEl].forEach(el => {
   el.addEventListener('focus', markStarted, { once:true });
 });
 
@@ -540,10 +558,10 @@ function grade(a){
   return { score, tier };
 }
 
-/* Lead filtri (eski formadagi mantiq): 9-sinfdan boshlab hammasi ro'yxatda,
-   ingliz zaif bo'lsa (Yo'q / 5.0-5.5 / 6.0) — faqat SAT 1200+ qutqaradi. */
+/* Lead filtri: o'tish chegarasi IELTS 7+ yoki SAT 1200+ (rad ekranidagi matnga mos).
+   Ingliz 6.5 va undan past bo'lsa — faqat SAT 1200+ qutqaradi. */
 function disqualify(a){
-  const weakEnglish = a.ingliz === "Yo'q" || a.ingliz === '5.0-5.5' || a.ingliz === '6.0';
+  const weakEnglish = a.ingliz === "Yo'q" || a.ingliz === '5.0-5.5' || a.ingliz === '6.0' || a.ingliz === '6.5';
   const satRescue = a.sat === '1200-1290' || a.sat === '1300-1390' || a.sat === '1400-1490' || a.sat === '1500+';
   return weakEnglish && !satRescue;
 }
@@ -568,7 +586,7 @@ function payload(type){
     type, sessionId,
     ...a,
     phone: digits ? '+' + digits : '',
-    telegram: '',
+    telegram: tgEl.value.trim() ? '@' + tgEl.value.trim().replace(/^@/,'').replace(/^https?:\/\/t\.me\//,'') : '',
     score: g.score, tier: g.tier, tags: '',
     ...utm, ...metaIds(),
     ua: navigator.userAgent,
