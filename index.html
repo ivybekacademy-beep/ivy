@@ -456,7 +456,11 @@ const satEl = document.getElementById('fSat');
 
 phoneEl.addEventListener('focus', () => { if(!phoneEl.value) phoneEl.value = '+998 '; });
 phoneEl.addEventListener('input', () => {
-  const d = phoneEl.value.replace(/\D/g,'').slice(0,15);
+  let d = phoneEl.value.replace(/\D/g,'');
+  /* iOS/Android avtoto'ldirish "+998 " prefiksga to'liq raqamni QO'SHIB yuboradi —
+     davlat kodi ikkilanadi (998998...). Takrorlangan kodni yig'ishtiramiz. */
+  while(d.startsWith('998998')) d = d.slice(3);
+  d = d.slice(0,15);
   phoneEl.value = formatPhone(d);
   phoneEl.classList.remove('invalid');
   document.getElementById('ePhone').classList.remove('on');

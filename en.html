@@ -835,7 +835,9 @@ function renderContact(){
 
   const phone = document.getElementById('fPhone');
   phone.addEventListener('input', () => {
-    const d = phone.value.replace(/\D/g,'').slice(0,15);
+    let d = phone.value.replace(/\D/g,'');
+    while(d.startsWith('998998')) d = d.slice(3);  // autofill doubles the prefilled country code
+    d = d.slice(0,15);
     phone.value = formatPhone(d);
     phone.classList.remove('invalid');
     document.getElementById('ePhone').classList.remove('on');
