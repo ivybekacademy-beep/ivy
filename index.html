@@ -305,6 +305,7 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
             <span class="lbl">Sinf</span>
             <select class="input" id="fSinf">
               <option value="" disabled selected>Tanlang</option>
+              <option value="1-8 sinf">1-8 sinf</option>
               <option value="9-sinf">9-sinf</option>
               <option value="10-sinf">10-sinf</option>
               <option value="11-sinf">11-sinf</option>
@@ -363,7 +364,6 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
           </label>
 
           <button class="submit" id="quizBtn" type="button">Yakunlash →</button>
-          <p class="privacy"><a href="#" id="skipQuiz" style="color:#8A90A3;text-decoration:underline;">O'tkazib yuborish</a></p>
         </div>
       </div>
 
@@ -570,6 +570,7 @@ function grade(a){
    2-qadam IELTS/SAT — filtrdan o'tsa yoki skip qilsa LEAD ketadi (CRM/bot/piksel),
    o'tmasa — screened (faqat jadval) va rad ekrani. */
 function disqualify(a){
+  if(a.sinf === '1-8 sinf') return true;
   const weakEnglish = a.ingliz === "Yo'q" || a.ingliz === '5.0-5.5' || a.ingliz === '6.0' || a.ingliz === '6.5';
   const satRescue = a.sat === '1200-1290' || a.sat === '1300-1390' || a.sat === '1400-1490' || a.sat === '1500+';
   return weakEnglish && !satRescue;
@@ -665,7 +666,7 @@ function showReject(){
   document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
-/* 2-qadam: filtr → lead yoki rad; skip → lead (kvalifikatsiyani setter qiladi) */
+/* 2-qadam: filtr → lead yoki rad */
 document.getElementById('quizBtn').addEventListener('click', () => {
   let ok = true;
   if(!ieltsEl.value){
@@ -682,11 +683,6 @@ document.getElementById('quizBtn').addEventListener('click', () => {
   if(disqualify(currentAnswers())) showReject();
   else sendLead();
 });
-document.getElementById('skipQuiz').addEventListener('click', (e) => {
-  e.preventDefault();
-  sendLead();
-});
-
 document.getElementById('leadForm').addEventListener('submit', (e) => {
   e.preventDefault();
   let ok = true;
@@ -713,6 +709,10 @@ document.getElementById('leadForm').addEventListener('submit', (e) => {
     if(bad) bad.focus();
     return;
   }
+
+  /* 1-8 sinf — dasturga mos emas: darhol rad, jadvalga "screened" bo'lib tushadi
+     (partial ham, CRM/bot/piksel ham yo'q) */
+  if(sinfEl.value === '1-8 sinf'){ showReject(); return; }
 
   /* 1-qadam: kontakt jadvalga yoziladi (partial), Advanced Matching yoqiladi.
      Lead (CRM/bot/piksel) — 2-qadam filtridan keyin. */
