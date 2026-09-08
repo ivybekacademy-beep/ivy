@@ -529,6 +529,10 @@ phoneEl.addEventListener('blur', () => {
   prevPhoneDigits = d;
 });
 let prevPhoneDigits = '';
+/* Boshidan +998 turadi: asosiy auditoriya O'zbekiston. Boshqa davlat bo'lsa,
+   +998 ni o'chirib o'z kodini yozadi (masalan +7, +1) — maska buni buzmaydi. */
+phoneEl.value = '+998 ';
+prevPhoneDigits = '998';
 phoneEl.addEventListener('input', (e) => {
   let d = phoneEl.value.replace(/\D/g,'');
   /* Avtoto'ldirish ba'zan "+998 " ustiga to'liq raqam QO'SHADI (kod ikkilanadi),
