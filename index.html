@@ -322,23 +322,17 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
 
         <div class="wiz-top">
           <button type="button" class="wiz-back" id="wizBack" hidden>← Orqaga</button>
-          <span class="wiz-count" id="wizCount">1 / 6</span>
+          <span class="wiz-count" id="wizCount">1 / 5</span>
         </div>
         <div class="wiz-bar"><span id="wizFill"></span></div>
 
-        <div class="step on" data-step="contact">
+        <div class="step on" data-step="name">
           <label class="field">
             <span class="lbl">Ism va familiya</span>
             <input class="input" id="fName" type="text" autocomplete="name" placeholder="Aziza Karimova">
             <span class="err" id="eName">Ismingizni kiriting</span>
           </label>
-          <label class="field">
-            <span class="lbl">Telefon raqam</span>
-            <input class="input" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67">
-            <span class="err" id="ePhone">Telefon raqamni to'liq kiriting</span>
-          </label>
-          <button class="submit" type="submit">Bepul diagnostikasini oling →</button>
-          <p class="privacy">Tugmani bosish orqali shaxsiy ma'lumotlaringizni qayta ishlashga rozilik bildirasiz. Raqamingizni faqat konsultatsiya uchun ishlatamiz.</p>
+          <button class="submit" type="submit">Davom etish →</button>
         </div>
 
         <div class="step" data-step="ielts">
@@ -349,18 +343,6 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
             <button type="button" class="opt" data-val="6.0-6.5">6.0 – 6.5</button>
             <button type="button" class="opt" data-val="6.5-7.0">6.5 – 7.0</button>
             <button type="button" class="opt" data-val="7.0+">7.0 va undan yuqori</button>
-          </div>
-        </div>
-
-        <div class="step" data-step="sat">
-          <span class="lbl">SAT ball</span>
-          <div class="opts" data-key="sat">
-            <button type="button" class="opt" data-val="Yo'q">Hali yo'q</button>
-            <button type="button" class="opt" data-val="1000-1190">1000 – 1190</button>
-            <button type="button" class="opt" data-val="1200-1290">1200 – 1290</button>
-            <button type="button" class="opt" data-val="1300-1390">1300 – 1390</button>
-            <button type="button" class="opt" data-val="1400-1490">1400 – 1490</button>
-            <button type="button" class="opt" data-val="1500+">1500+</button>
           </div>
         </div>
 
@@ -378,24 +360,23 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
         <div class="step" data-step="sinf">
           <span class="lbl">Sinf</span>
           <div class="opts" data-key="sinf">
+            <button type="button" class="opt" data-val="8-sinf">8-sinf</button>
             <button type="button" class="opt" data-val="9-sinf">9-sinf</button>
             <button type="button" class="opt" data-val="10-sinf">10-sinf</button>
             <button type="button" class="opt" data-val="11-sinf">11-sinf</button>
-            <button type="button" class="opt" data-val="12-sinf">12-sinf</button>
             <button type="button" class="opt" data-val="Gap year">Gap year</button>
-            <button type="button" class="opt" data-val="Talaba">Universitet talabasi</button>
+            <button type="button" class="opt" data-val="Boshqa">Boshqa (12-sinf, talaba)</button>
           </div>
         </div>
 
-        <div class="step" data-step="tg">
+        <div class="step" data-step="phone">
           <label class="field">
-            <span class="lbl">Telegram username <span style="text-transform:none;letter-spacing:0;opacity:.7;font-weight:500;">— tavsiya etiladi</span></span>
-            <div class="tg-field">
-              <span class="tg-at">@</span>
-              <input id="fTg" type="text" autocomplete="off" autocapitalize="none" placeholder="username">
-            </div>
+            <span class="lbl">Telefon raqam</span>
+            <input class="input" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67">
+            <span class="err" id="ePhone">Telefon raqamni to'liq kiriting</span>
           </label>
-          <button class="submit" id="sendBtn" type="submit">Yakunlash →</button>
+          <button class="submit" id="sendBtn" type="submit">Bepul diagnostikasini oling →</button>
+          <p class="privacy">Tugmani bosish orqali shaxsiy ma'lumotlaringizni qayta ishlashga rozilik bildirasiz. Raqamingizni faqat konsultatsiya uchun ishlatamiz.</p>
         </div>
       </form>
 
@@ -403,6 +384,14 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
         <div class="stamp">Ariza qabul qilindi ✓</div>
         <h2>Ro'yxatdan o'tdingiz</h2>
         <p>Jamoamiz <b id="succPhone"></b> shu raqamingizga tez orada bog'lanishadi</p>
+      </div>
+
+      <div class="scard" id="notfitCard">
+        <div class="stamp">Natija</div>
+        <h2>Hozircha mos kelmaysiz</h2>
+        <p>Dasturimizga kirish uchun minimal talablar:</p>
+        <p id="notfitList" style="white-space:pre-line;"></p>
+        <p>Natijalaringiz shu darajaga yetganda qayta ariza qoldiring — sizni kutamiz.</p>
       </div>
 
     </div>
@@ -514,12 +503,9 @@ function fixLocal(d){
 
 const nameEl = document.getElementById('fName');
 const phoneEl = document.getElementById('fPhone');
-const tgEl = document.getElementById('fTg');
 
 /* Tanlov-savollar javoblari (select o'rniga tugmalar) */
-const ans = { sinf:'', ingliz:'', sat:'', gpa:'' };
-
-tgEl.addEventListener('input', () => { tgEl.value = tgEl.value.replace(/@/g,'').replace(/\s/g,''); });
+const ans = { sinf:'', ingliz:'', gpa:'' };
 
 phoneEl.addEventListener('focus', () => { if(!phoneEl.value) phoneEl.value = '+998 '; });
 /* Maydondan chiqishda ham tuzatamiz — hodisa-evristika o'tkazib yuborgan bo'lsa ham */
@@ -559,43 +545,43 @@ function markStarted(){
   if(typeof fbq === 'function') fbq('track', 'InitiateCheckout');
   post(payload('partial'));
 }
-[nameEl, phoneEl, tgEl].forEach(el => {
+[nameEl, phoneEl].forEach(el => {
   el.addEventListener('focus', markStarted, { once:true });
 });
 
 /* ============================================================
-   SCORING (lid sifati — jadval va CompleteRegistration uchun)
+   FILTR — kim dasturga mos keladi
+   IELTS 7.0+  VA  GPA 4.7–5.0  VA  8–11-sinf yoki gap year.
+   Apps Script'dagi scoreColor() bilan bir xil qoida (Green / Red).
    ============================================================ */
+const FIT_SINF = ['8-sinf','9-sinf','10-sinf','11-sinf','Gap year'];
+function fitCheck(a){
+  return {
+    ielts: a.ingliz === '7.0+',
+    gpa:   a.gpa === '4.7-5.0',
+    sinf:  FIT_SINF.indexOf(a.sinf) !== -1
+  };
+}
+function isFit(a){
+  const f = fitCheck(a);
+  return f.ielts && f.gpa && f.sinf;
+}
+/* Jadval va CompleteRegistration uchun: mos = HOT/100, qolgani = NURTURE/0 */
 function grade(a){
-  let score = 0;
-  if(a.sinf === '11-sinf' || a.sinf === '12-sinf' || a.sinf === 'Gap year') score += 40;
-  else if(a.sinf === '10-sinf') score += 30;
-  else if(a.sinf === '9-sinf') score += 22;
-  else if(a.sinf === 'Talaba') score += 10;
-
-  if(a.ingliz === '7.0+') score += 35;
-  else if(a.ingliz === '6.5-7.0') score += 26;
-  else if(a.ingliz === '6.0-6.5') score += 14;
-
-  if(a.sat === '1500+' || a.sat === '1400-1490' || a.sat === '1300-1390' || a.sat === '1200-1290') score += 25;
-  else if(a.sat === '1000-1190') score += 12;
-
-  const tier = score >= 70 ? 'HOT' : score >= 45 ? 'WARM' : 'NURTURE';
-  return { score, tier };
+  const fit = isFit(a);
+  return { score: fit ? 100 : 0, tier: fit ? 'HOT' : 'NURTURE' };
 }
 
 /* ============================================================
    SEND (Apps Script kontrakti: HEADERS bilan bir xil kalitlar)
-   1-sahifa (ism+telefon) = LEAD: CRM, bot, piksel darhol.
-   Keyingi savollar filtrlamaydi — javoblar "qualified" bo'lib
-   xuddi shu qatorga qo'shilib boradi (sessionId bo'yicha merge).
+   Ism → 3 savol → mos kelsa telefon = LEAD (CRM, bot, piksel).
+   Mos kelmasa telefon so'ralmaydi, qator "screened" bo'lib qoladi.
    ============================================================ */
 function currentAnswers(){
   return {
     name: nameEl.value.trim(),
     sinf: ans.sinf,
     ingliz: ans.ingliz,
-    sat: ans.sat,
     gpa: ans.gpa
   };
 }
@@ -608,7 +594,7 @@ function payload(type){
     type, sessionId,
     ...a,
     phone: digits ? '+' + digits : '',
-    telegram: tgEl.value.trim() ? '@' + tgEl.value.trim().replace(/^@/,'').replace(/^https?:\/\/t\.me\//,'') : '',
+    telegram: '',
     score: g.score, tier: g.tier, tags: '',
     ...utm, ...metaIds(),
     ua: navigator.userAgent,
@@ -646,28 +632,28 @@ function showStep(i){
 
 function validateCurrent(){
   const key = steps[stepIdx].dataset.step;
-  if(key === 'contact'){
-    let ok = true;
+  if(key === 'name'){
     if(nameEl.value.trim().length < 2){
       nameEl.classList.add('invalid');
       document.getElementById('eName').classList.add('on');
-      ok = false;
+      nameEl.focus();
+      return false;
     }
+    return true;
+  }
+  if(key === 'phone'){
     const digits = fixLocal(phoneEl.value.replace(/\D/g,''));
     if(digits !== phoneEl.value.replace(/\D/g,'')) phoneEl.value = formatPhone(digits);
     if(!phoneOk(digits)){
       phoneEl.classList.add('invalid');
       document.getElementById('ePhone').classList.add('on');
-      ok = false;
+      phoneEl.focus();
+      return false;
     }
-    if(!ok){
-      const bad = document.querySelector('.input.invalid');
-      if(bad) bad.focus();
-    }
-    return ok;
+    return true;
   }
-  if(key === 'sinf' || key === 'ielts' || key === 'sat' || key === 'gpa'){
-    const map = { sinf:'sinf', ielts:'ingliz', sat:'sat', gpa:'gpa' };
+  if(key === 'sinf' || key === 'ielts' || key === 'gpa'){
+    const map = { sinf:'sinf', ielts:'ingliz', gpa:'gpa' };
     if(!ans[map[key]]) return false;
   }
   return true;
@@ -675,22 +661,28 @@ function validateCurrent(){
 
 /* Javobdan keyingi yon ta'sirlar. false = wizard shu yerda tugaydi. */
 function afterAnswer(key){
-  if(key === 'contact'){
-    /* Kontakt = tayyor LEAD: Advanced Matching, piksel, CRM, bot */
-    if(typeof fbq === 'function'){
-      const digits = fixLocal(phoneEl.value.replace(/\D/g,''));
-      const am = { ph: digits, country: 'uz' };
-      const fn = nameEl.value.trim().split(/\s+/)[0].toLowerCase();
-      if(fn) am.fn = fn;
-      fbq('init', META_PIXEL_ID, am);
-    }
-    leadNow();
+  if(key === 'name'){
+    document.getElementById('formLead').textContent = "3 ta qisqa savol — javoblaringiz asosida dasturga mos kelishingizni tekshiramiz.";
   }
-  if(key === 'sinf' || key === 'ielts' || key === 'sat' || key === 'gpa'){
+  if(key === 'ielts' || key === 'gpa'){
     /* oraliq javob — jimgina jadvalga yoziladi, xabar yuborilmaydi */
     post(payload('answer'));
   }
-  if(key === 'tg'){ finishQualify(); return false; }
+  if(key === 'sinf'){
+    if(isFit(currentAnswers())){
+      post(payload('answer'));
+      document.getElementById('wizStamp').textContent = 'Siz mos kelasiz ✓';
+      document.getElementById('wizStamp').hidden = false;
+      document.getElementById('formLead').textContent = "Tabriklaymiz — siz dasturimizga mos kelasiz! Menejer bog'lanishi uchun raqamingizni qoldiring.";
+      return true;   /* → telefon */
+    }
+    showNotFit();
+    return false;
+  }
+  if(key === 'phone'){
+    leadNow();
+    return false;
+  }
   return true;
 }
 
@@ -725,21 +717,33 @@ document.getElementById('leadForm').addEventListener('submit', function(e){
 });
 
 /* ============================================================
-   LEAD (1-sahifadan keyin) va YAKUN
+   LEAD (telefondan keyin, faqat mos kelganlar) va YAKUN
+   Javoblar lead bilan birga ketadi — Apps Script darhol
+   maydonlarni to'ldiradi, Green tegini qo'yadi va Qualified'ga o'tkazadi.
    ============================================================ */
 let leadSent = false;
 function leadNow(){
   if(leadSent) return;
   leadSent = true;
   formStarted = true;   /* lead ketdi — endi partial yuborilmaydi (type ustidan yozmasin) */
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.textContent = 'Yuborilmoqda...';
   if(typeof fbq === 'function'){
+    /* Advanced Matching: telefon + ism */
+    const digits = fixLocal(phoneEl.value.replace(/\D/g,''));
+    const am = { ph: digits, country: 'uz' };
+    const fn = nameEl.value.trim().split(/\s+/)[0].toLowerCase();
+    if(fn) am.fn = fn;
+    fbq('init', META_PIXEL_ID, am);
     /* eventID = sessionId (CAPI bilan dedup) */
     fbq('track', 'Lead', {}, { eventID: sessionId });
+    /* Faqat mos kelganlar — Meta aynan shunday odamlarni qidirishni o'rganadi */
+    fbq('track', 'CompleteRegistration', { value: 100, currency: 'USD' }, { eventID: sessionId + '_q' });
   }
   if(typeof tgp === 'function') tgp('event', '4HGABMb6-Ix8DtlHR'); /* Telegram Ads: Lead */
-  post(payload('lead'));
-  document.getElementById('wizStamp').hidden = false;
-  document.getElementById('formLead').textContent = "Javoblaringiz asosida sizga aniqroq tahlil tayyorlaymiz (30 soniya).";
+  post(payload('lead')).then(showFinal);
+  setTimeout(showFinal, 2500);
 }
 
 let finalShown = false;
@@ -753,21 +757,23 @@ function showFinal(){
   document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
-/* Savollar tugadi: qatorni "qualified" qilib yangilaymiz.
-   CompleteRegistration — sifat balli bilan (Meta shu bo'yicha ham optimize qila oladi). */
-let qualifySent = false;
-function finishQualify(){
-  if(qualifySent) return;
-  qualifySent = true;
-  const btn = document.getElementById('sendBtn');
-  btn.disabled = true;
-  btn.textContent = 'Yuborilmoqda...';
-  if(typeof fbq === 'function'){
-    const g = grade(currentAnswers());
-    fbq('track', 'CompleteRegistration', { value: g.score, currency: 'USD' }, { eventID: sessionId + '_q' });
-  }
-  post(payload('qualified')).then(showFinal);
-  setTimeout(showFinal, 2500);
+/* Mos kelmadi: telefon so'ralmaydi, qator "screened" bo'lib qoladi,
+   ekranda — qaysi talab yetmadi. */
+function showNotFit(){
+  if(finalShown) return;
+  finalShown = true;
+  const a = currentAnswers();
+  const f = fitCheck(a);
+  const rows = [
+    (f.ielts ? '✓' : '✗') + ' IELTS 7.0 va undan yuqori' + (f.ielts ? '' : ' (sizda: ' + (a.ingliz || '—') + ')'),
+    (f.gpa   ? '✓' : '✗') + ' GPA 4.7 – 5.0' + (f.gpa ? '' : ' (sizda: ' + (a.gpa || '—') + ')'),
+    (f.sinf  ? '✓' : '✗') + ' 8–11-sinf yoki gap year' + (f.sinf ? '' : ' (sizda: ' + (a.sinf || '—') + ')')
+  ];
+  document.getElementById('notfitList').textContent = rows.join('\n');
+  post(payload('screened'));
+  document.getElementById('leadForm').style.display = 'none';
+  document.getElementById('notfitCard').classList.add('on');
+  document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
 /* Karusel ekranda bo'lmaganda animatsiya to'xtaydi — CPU va batareya tejaladi */
