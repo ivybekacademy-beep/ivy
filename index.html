@@ -322,7 +322,7 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
 
         <div class="wiz-top">
           <button type="button" class="wiz-back" id="wizBack" hidden>← Orqaga</button>
-          <span class="wiz-count" id="wizCount">1 / 5</span>
+          <span class="wiz-count" id="wizCount">1 / 4</span>
         </div>
         <div class="wiz-bar"><span id="wizFill"></span></div>
 
@@ -343,17 +343,6 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
             <button type="button" class="opt" data-val="6.0-6.5">6.0 – 6.5</button>
             <button type="button" class="opt" data-val="6.5-7.0">6.5 – 7.0</button>
             <button type="button" class="opt" data-val="7.0+">7.0 va undan yuqori</button>
-          </div>
-        </div>
-
-        <div class="step" data-step="gpa">
-          <span class="lbl">GPA (maktab bahosi, 5 ballik)</span>
-          <div class="opts" data-key="gpa">
-            <button type="button" class="opt" data-val="4.7-5.0">4.7 – 5.0</button>
-            <button type="button" class="opt" data-val="4.0-4.6">4.0 – 4.6</button>
-            <button type="button" class="opt" data-val="3.5-3.9">3.5 – 3.9</button>
-            <button type="button" class="opt" data-val="<3.5">3.5 dan past</button>
-            <button type="button" class="opt" data-val="Bilmayman">Bilmayman</button>
           </div>
         </div>
 
@@ -505,6 +494,7 @@ const nameEl = document.getElementById('fName');
 const phoneEl = document.getElementById('fPhone');
 
 /* Tanlov-savollar javoblari (select o'rniga tugmalar) */
+/* gpa endi so'ralmaydi, lekin kalit qoladi: Apps Script ustuni bo'sh yoziladi */
 const ans = { sinf:'', ingliz:'', gpa:'' };
 
 phoneEl.addEventListener('focus', () => { if(!phoneEl.value) phoneEl.value = '+998 '; });
@@ -551,20 +541,19 @@ function markStarted(){
 
 /* ============================================================
    FILTR — kim dasturga mos keladi
-   IELTS 7.0+  VA  GPA 4.7–5.0  VA  8–11-sinf yoki gap year.
+   IELTS 7.0+  VA  8–11-sinf yoki gap year.
    Apps Script'dagi scoreColor() bilan bir xil qoida (Green / Red).
    ============================================================ */
 const FIT_SINF = ['8-sinf','9-sinf','10-sinf','11-sinf','Gap year'];
 function fitCheck(a){
   return {
     ielts: a.ingliz === '7.0+',
-    gpa:   a.gpa === '4.7-5.0',
     sinf:  FIT_SINF.indexOf(a.sinf) !== -1
   };
 }
 function isFit(a){
   const f = fitCheck(a);
-  return f.ielts && f.gpa && f.sinf;
+  return f.ielts && f.sinf;
 }
 /* Jadval va CompleteRegistration uchun: mos = HOT/100, qolgani = NURTURE/0 */
 function grade(a){
@@ -574,7 +563,7 @@ function grade(a){
 
 /* ============================================================
    SEND (Apps Script kontrakti: HEADERS bilan bir xil kalitlar)
-   Ism → 3 savol → mos kelsa telefon = LEAD (CRM, bot, piksel).
+   Ism → 2 savol → mos kelsa telefon = LEAD (CRM, bot, piksel).
    Mos kelmasa telefon so'ralmaydi, qator "screened" bo'lib qoladi.
    ============================================================ */
 function currentAnswers(){
@@ -652,8 +641,8 @@ function validateCurrent(){
     }
     return true;
   }
-  if(key === 'sinf' || key === 'ielts' || key === 'gpa'){
-    const map = { sinf:'sinf', ielts:'ingliz', gpa:'gpa' };
+  if(key === 'sinf' || key === 'ielts'){
+    const map = { sinf:'sinf', ielts:'ingliz' };
     if(!ans[map[key]]) return false;
   }
   return true;
@@ -662,9 +651,9 @@ function validateCurrent(){
 /* Javobdan keyingi yon ta'sirlar. false = wizard shu yerda tugaydi. */
 function afterAnswer(key){
   if(key === 'name'){
-    document.getElementById('formLead').textContent = "3 ta qisqa savol — javoblaringiz asosida dasturga mos kelishingizni tekshiramiz.";
+    document.getElementById('formLead').textContent = "2 ta qisqa savol — javoblaringiz asosida dasturga mos kelishingizni tekshiramiz.";
   }
-  if(key === 'ielts' || key === 'gpa'){
+  if(key === 'ielts'){
     /* oraliq javob — jimgina jadvalga yoziladi, xabar yuborilmaydi */
     post(payload('answer'));
   }
@@ -766,7 +755,6 @@ function showNotFit(){
   const f = fitCheck(a);
   const rows = [
     (f.ielts ? '✓' : '✗') + ' IELTS 7.0 va undan yuqori' + (f.ielts ? '' : ' (sizda: ' + (a.ingliz || '—') + ')'),
-    (f.gpa   ? '✓' : '✗') + ' GPA 4.7 – 5.0' + (f.gpa ? '' : ' (sizda: ' + (a.gpa || '—') + ')'),
     (f.sinf  ? '✓' : '✗') + ' 8–11-sinf yoki gap year' + (f.sinf ? '' : ' (sizda: ' + (a.sinf || '—') + ')')
   ];
   document.getElementById('notfitList').textContent = rows.join('\n');
