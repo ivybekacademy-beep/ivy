@@ -511,7 +511,7 @@ h1,h2,h3{
         <div class="hero-cta">
           <a href="#ariza" class="btn">Apply now</a>
         </div>
-        <p class="cta-note">30 seconds &middot; 3 questions</p>
+        <p class="cta-note">30 seconds &middot; 4 quick steps</p>
 
         <div class="figure" id="heroFigure" aria-label="$16 million">$<span id="figN" data-count="16">16</span><span class="unit">M+</span></div>
 
@@ -631,22 +631,33 @@ const TELEGRAM_URL = 'https://t.me/ivybek_asadbek';
 /* ============================================================
    QUESTIONS
    ============================================================ */
+/* Javob QIYMATLARI o'zbek versiyasi bilan bir xil bo'lishi shart: Apps Script
+   scoreColor() aynan shu satrlarni tekshiradi ('7.0+', '10-sinf'), va jadval
+   bilan amoCRM ustunlarida ikkala til bitta qiymat to'plamini ishlatadi.
+   Ekranda inglizcha `l` (label), bazaga esa `v` (value) ketadi. */
 const QUESTIONS = [
+  { id:'ingliz', title:'What is your IELTS score?',
+    opts:[
+      { v:"Hali yo'q", l:'I have not taken it yet' },
+      { v:'<6.0',      l:'Below 6.0' },
+      { v:'6.0-6.5',   l:'6.0 \u2013 6.5' },
+      { v:'6.5-7.0',   l:'6.5 \u2013 7.0' },
+      { v:'7.0+',      l:'7.0 and above' }
+    ] },
+
   { id:'sinf', title:'What grade are you in?',
-    opts:['Grade 1-8','Grade 9','Grade 10','Grade 11','I have graduated'] },
-
-  { id:'ingliz', title:'What is your English level?',
-    opts:['I do not speak English well',
-          'IELTS 6.0 or below',
-          'IELTS 6.5',
-          'IELTS 7.0',
-          'IELTS 7.5\u20138.0+'] },
-
-  { id:'sat', title:'Have you taken the SAT?',
-    opts:['Yes, 1200 or above','Yes, below 1150','No, not yet'] }
+    opts:[
+      { v:'8-sinf',   l:'Grade 8' },
+      { v:'9-sinf',   l:'Grade 9' },
+      { v:'10-sinf',  l:'Grade 10' },
+      { v:'11-sinf',  l:'Grade 11' },
+      { v:'Gap year', l:'Gap year' },
+      { v:'Boshqa',   l:'Other (Grade 12, university student)' }
+    ] }
 ];
 
-const TOTAL_STEPS = QUESTIONS.length + 1;
+/* Ism -> 2 savol -> telefon */
+const TOTAL_STEPS = QUESTIONS.length + 2;
 
 /* ============================================================
    STATE
@@ -706,112 +717,139 @@ function fixLocal(d){
    ============================================================ */
 function render(){
   progBar.style.width = Math.round((step / TOTAL_STEPS) * 100) + '%';
-  if(step < QUESTIONS.length) renderQuestion(QUESTIONS[step]);
-  else{
-    const dq = disqualify();
-    if(dq) renderNotFit(dq); else renderContact();
-  }
+  if(step === 0) renderName();
+  else if(step <= QUESTIONS.length) renderQuestion(QUESTIONS[step - 1]);
+  else if(isFit()) renderContact();
+  else renderNotFit();
   host.classList.remove('on'); void host.offsetWidth; host.classList.add('on');
 }
 
-/* Lead filtri: mos kelmaydiganlar kontakt qadamiga o'tmaydi.
-   IELTS past bo'lsa (bilmayman / 6.0 va past) - faqat SAT 1200+ qutqaradi. */
-function disqualify(){
-  if(answers.sinf === 'Grade 1-8') return 'sinf';
-  const noIelts = answers.ingliz === 'I do not speak English well' ||
-                  answers.ingliz === 'IELTS 6.0 or below' ||
-                  answers.ingliz === 'IELTS 6.5';
-  if(noIelts && answers.sat !== 'Yes, 1200 or above') return 'tayyorgarlik';
-  return null;
+/* Lead filtri (index.html dagi fitCheck bilan bir xil qoida):
+   IELTS 7.0+ VA 8-11-sinf yoki gap year. Mos kelmasa telefon so'ralmaydi. */
+const FIT_SINF = ['8-sinf','9-sinf','10-sinf','11-sinf','Gap year'];
+function fitCheck(){
+  return {
+    ielts: answers.ingliz === '7.0+',
+    sinf:  FIT_SINF.indexOf(answers.sinf) !== -1
+  };
+}
+function isFit(){
+  const f = fitCheck();
+  return f.ielts && f.sinf;
+}
+/* Tanlangan javobning ekrandagi inglizcha nomi ("7.0+" -> "7.0 and above") */
+function labelOf(qid){
+  const q = QUESTIONS.filter(function(x){ return x.id === qid; })[0];
+  const o = q && q.opts.filter(function(x){ return x.v === answers[qid]; })[0];
+  return o ? o.l : (answers[qid] || '\u2014');
 }
 
-function renderNotFit(reason){
+function renderNotFit(){
   post(payload('screened'));   // javoblar jadvalga tushadi, amoCRM'ga emas
   progBar.style.width = '100%';
+  const f = fitCheck();
+  const rows = [
+    (f.ielts ? '\u2713' : '\u2717') + ' IELTS 7.0 and above' + (f.ielts ? '' : ' (yours: ' + esc(labelOf('ingliz')) + ')'),
+    (f.sinf  ? '\u2713' : '\u2717') + ' Grade 8\u201311 or gap year' + (f.sinf ? '' : ' (yours: ' + esc(labelOf('sinf')) + ')')
+  ];
   host.innerHTML = `
     <div class="final">
-      <h3>Unfortunately, you didn't pass this time</h3>
-      <p>We accept students from Grade 9 with IELTS 7+ or SAT 1200+. Apply again once you are ready &mdash; and follow us on Instagram in the meantime!</p>
-      <a class="btn btn-block" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Follow on Instagram</a>
+      <h3>Not a match yet</h3>
+      <p>The minimum requirements for our program:</p>
+      <p style="white-space:pre-line;">${rows.join('\n')}</p>
+      <p>Apply again once you meet them &mdash; we will be waiting for you.</p>
       <div class="nav-row">
-        <button type="button" class="btn btn-back" id="backBtn" aria-label="Back">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
+      <button type="button" class="btn btn-back" id="backBtn" aria-label="Back">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
       </div>
     </div>`;
   document.getElementById('backBtn').addEventListener('click', prev);
 }
 
+/* ── 1-qadam: ism ─────────────────────────────────────────── */
+function renderName(){
+  host.innerHTML = `
+    <div class="q-count">Step 1 / ${TOTAL_STEPS}</div>
+    <h3 class="q-title">What is your name?</h3>
+    <div class="field">
+      <label for="fName">Full name</label>
+      <input class="input" id="fName" type="text" autocomplete="name"
+             placeholder="e.g. Aziza Karimova" value="${esc(answers.name||'')}">
+      <p class="err" id="eName">Please enter your name.</p>
+    </div>
+    <div class="nav-row">
+      <button type="button" class="btn" id="nextBtn">Continue</button>
+    </div>`;
+
+  const el = document.getElementById('fName');
+  const go = document.getElementById('nextBtn');
+  el.addEventListener('input', () => {
+    el.classList.remove('invalid');
+    document.getElementById('eName').classList.remove('on');
+  });
+  el.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); go.click(); } });
+  go.addEventListener('click', () => {
+    if(el.value.trim().length < 2){
+      el.classList.add('invalid');
+      document.getElementById('eName').classList.add('on');
+      el.focus();
+      return;
+    }
+    answers.name = el.value.trim();
+    if(!window.__formStarted){ window.__formStarted = 1;
+      if(typeof fbq === 'function') fbq('track', 'InitiateCheckout'); }   // Meta: forma boshlandi
+    next();
+  });
+  setTimeout(() => el.focus(), 250);
+}
+
 function renderQuestion(q){
   const cur = answers[q.id];
-  const sel = q.multi ? (cur || []) : (cur ? [cur] : []);
 
   host.innerHTML = `
-    <div class="q-count">Question ${step+1} / ${TOTAL_STEPS}</div>
+    <div class="q-count">Step ${step+1} / ${TOTAL_STEPS}</div>
     <h3 class="q-title">${esc(q.title)}</h3>
     ${q.hint ? `<p class="q-hint">${esc(q.hint)}</p>` : ''}
     <div class="opts">
       ${q.opts.map(o => `
-        <button type="button" class="opt${sel.includes(o)?' selected':''}"
-                ${q.multi?'data-multi':''} data-v="${esc(o)}">
-          ${TICK}<span>${esc(o)}</span>
+        <button type="button" class="opt${o.v === cur ? ' selected' : ''}" data-v="${esc(o.v)}">
+          ${TICK}<span>${esc(o.l)}</span>
         </button>`).join('')}
     </div>
     <p class="err" id="qErr">Choose an option to continue.</p>
     <div class="nav-row">
-      ${step > 0 ? `<button type="button" class="btn btn-back" id="backBtn" aria-label="Back">
+      <button type="button" class="btn btn-back" id="backBtn" aria-label="Back">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>` : ''}
+      </button>
       <button type="button" class="btn" id="nextBtn">Continue</button>
     </div>`;
 
   let advanced = false;
   host.querySelectorAll('.opt').forEach(btn => {
     btn.addEventListener('click', () => {
-      if(!window.__formStarted){ window.__formStarted = 1;
-        if(typeof fbq === 'function') fbq('track', 'InitiateCheckout'); }   // Meta: forma boshlandi
-      const v = btn.dataset.v;
-      if(q.multi){
-        let arr = answers[q.id] || [];
-        if(arr.includes(v)) arr = arr.filter(x => x !== v);
-        else if(arr.length < q.multi) arr = arr.concat(v);
-        else return;
-        answers[q.id] = arr;
-        host.querySelectorAll('.opt').forEach(b => b.classList.toggle('selected', arr.includes(b.dataset.v)));
-      }else{
-        answers[q.id] = v;
-        host.querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        /* Auto-advance: one tap moves to the next question.
-           Every extra tap is another chance to drop off. */
-        if(!advanced){ advanced = true; setTimeout(next, 260); }
-        return;
-      }
+      answers[q.id] = btn.dataset.v;
+      host.querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
       document.getElementById('qErr').classList.remove('on');
+      /* Auto-advance: one tap moves to the next step.
+         Every extra tap is another chance to drop off. */
+      if(!advanced){ advanced = true; setTimeout(next, 260); }
     });
   });
 
-  const back = document.getElementById('backBtn');
-  if(back) back.addEventListener('click', prev);
+  document.getElementById('backBtn').addEventListener('click', prev);
   document.getElementById('nextBtn').addEventListener('click', () => {
-    const a = answers[q.id];
-    if(!a || (q.multi && !a.length)){ document.getElementById('qErr').classList.add('on'); return; }
+    if(!answers[q.id]){ document.getElementById('qErr').classList.add('on'); return; }
     next();
   });
 }
 
 function renderContact(){
   host.innerHTML = `
-    <div class="q-count">Last step</div>
-    <h3 class="q-title">Leave your details to book your consultation</h3>
-    <p class="q-hint">We will use your number only for this consultation.</p>
-
-    <div class="field">
-      <label for="fName">Your name</label>
-      <input class="input" id="fName" type="text" autocomplete="given-name"
-             placeholder="e.g. Asadbek" value="${esc(answers.name||'')}">
-      <p class="err" id="eName">Please enter your name.</p>
-    </div>
+    <div class="q-count">Step ${TOTAL_STEPS} / ${TOTAL_STEPS}</div>
+    <h3 class="q-title">You are a match &mdash; leave your phone number</h3>
+    <p class="q-hint">Our team will call you to book your free consultation. We use your number only for this.</p>
 
     <div class="field">
       <label for="fPhone">Phone number</label>
@@ -821,15 +859,6 @@ function renderContact(){
                placeholder="998 90 123 45 67" value="${esc(answers.phoneRaw||'998 ')}">
       </div>
       <p class="err" id="ePhone">Enter the full number with country code, e.g. 998 90 123 45 67.</p>
-    </div>
-
-    <div class="field">
-      <label for="fTg">Telegram username <span style="text-transform:none;letter-spacing:0;opacity:.7">&mdash; recommended</span></label>
-      <div class="phone-row">
-        <div class="phone-pre">@</div>
-        <input class="input" id="fTg" type="text" autocomplete="username"
-               placeholder="username" value="${esc((answers.telegram||'').replace(/^@/,''))}">
-      </div>
     </div>
 
     <div class="nav-row">
@@ -858,12 +887,7 @@ function renderContact(){
     phone.value = d ? formatPhone(d) : '';
     prevPhoneDigits = d;
   });
-  const tg = document.getElementById('fTg');
-  tg.addEventListener('input', () => { tg.value = tg.value.replace(/@/g,''); });  // @ prefiks avtomatik, ikkinchisini olib tashlaymiz
-  document.getElementById('fName').addEventListener('input', e => {
-    e.target.classList.remove('invalid');
-    document.getElementById('eName').classList.remove('on');
-  });
+  setTimeout(() => phone.focus(), 250);
 
   document.getElementById('backBtn').addEventListener('click', prev);
   document.getElementById('sendBtn').addEventListener('click', submit);
@@ -873,6 +897,7 @@ function renderContact(){
    NAVIGATION
    ============================================================ */
 function next(){ savePartial(); step++; render(); keepInView(); }
+/* 1-yozuv partial, keyingilari answer - jadvalda type ustidan yozilmasin */
 function prev(){ step--; render(); keepInView(); }
 
 function keepInView(){
@@ -887,27 +912,8 @@ function keepInView(){
    SCORING
    ============================================================ */
 function grade(){
-  let score = 0; const tags = [];
-
-  const s = answers.sinf;                                  // 0..40
-  if(s === 'Grade 11' || s === 'I have graduated') score += 40;
-  else if(s === 'Grade 10') score += 30;
-  else if(s === 'Grade 9') score += 22;
-  else score += 14;                                        // 1-8 sinf - hali erta, NURTURE
-
-  const e = answers.ingliz;                                // 0..35
-  if(e === 'IELTS 7.5\u20138.0+') score += 35;
-  else if(e === 'IELTS 7.0') score += 32;
-  else if(e === 'IELTS 6.5') score += 26;
-  else if(e === 'IELTS 6.0 or below') score += 14;
-
-  if(answers.sat === 'Yes, 1200 or above') score += 25;   // 0..25
-  else if(answers.sat === 'Yes, below 1150') score += 12;
-
-  const tier = score >= 70 ? 'HOT'
-             : score >= 45 ? 'WARM' : 'NURTURE';
-
-  return {score, tier, tags};
+  const fit = isFit();
+  return { score: fit ? 100 : 0, tier: fit ? 'HOT' : 'NURTURE', tags: [] };
 }
 
 /* ============================================================
@@ -933,36 +939,30 @@ function post(data){
   }).catch(() => {});
 }
 
-function savePartial(){ post(payload('partial')); }
+let partialSent = false;
+function savePartial(){
+  post(payload(partialSent ? 'answer' : 'partial'));
+  partialSent = true;
+}
 
 function submit(){
-  const name = document.getElementById('fName');
   const phone = document.getElementById('fPhone');
-  const tg = document.getElementById('fTg');
-  let ok = true;
 
   host.querySelectorAll('.err').forEach(el => el.classList.remove('on'));
   host.querySelectorAll('.input').forEach(el => el.classList.remove('invalid'));
 
-  if(name.value.trim().length < 2){
-    name.classList.add('invalid');
-    document.getElementById('eName').classList.add('on');
-    ok = false;
-  }
   const digits = fixLocal(phone.value.replace(/\D/g,''));
   if(digits !== phone.value.replace(/\D/g,'')) phone.value = formatPhone(digits);
   if(!phoneOk(digits)){
     phone.classList.add('invalid');
     document.getElementById('ePhone').classList.add('on');
-    ok = false;
+    phone.focus();
+    return;
   }
-  if(!ok){ (name.classList.contains('invalid') ? name : phone).focus(); return; }
 
-  answers.name = name.value.trim();
   answers.phoneRaw = phone.value.trim();
   answers.phone = '+' + digits;
-  const t = tg.value.trim().replace(/^@/,'').replace(/^https?:\/\/t\.me\//,'');
-  answers.telegram = t ? '@' + t : '';
+  answers.telegram = '';
 
   const btn = document.getElementById('sendBtn');
   btn.disabled = true;
@@ -978,9 +978,9 @@ function submit(){
 
     /* eventID = sessionId. Apps Script sends the same Lead from the server (CAPI)
        with this id, so Meta counts one event, not two. */
-    /* value = lid sifati (0..100). Meta hajm uchun emas, sifatli lid uchun optimallashtiradi. */
-    const gq = grade();
-    fbq('track', 'Lead', { value: gq.score, currency: 'USD' }, { eventID: sessionId });
+    fbq('track', 'Lead', {}, { eventID: sessionId });
+    /* Bu qadamga faqat mos kelganlar yetadi - Meta aynan shunday odamlarni qidirishni o'rganadi */
+    fbq('track', 'CompleteRegistration', { value: 100, currency: 'USD' }, { eventID: sessionId + '_q' });
   }
   if(typeof tgp === 'function') tgp('event', '4HGABMb6-Ix8DtlHR'); // Telegram Ads: Lead
   post(payload('lead')).then(showFinal);
