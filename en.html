@@ -725,21 +725,28 @@ function render(){
   host.classList.remove('on'); void host.offsetWidth; host.classList.add('on');
 }
 
-/* Lead filtri (index.html dagi fitCheck bilan bir xil qoida):
-   IELTS 7.0+ VA 8-11-sinf yoki gap year. Mos kelmasa telefon so'ralmaydi. */
+/* Lead filtri (index.html va Apps Script scoreColor() bilan bir xil qoida):
+   Green  - IELTS 7.0+ VA 8-11-sinf yoki gap year.
+   Yellow - IELTS 6.5 VA 10-sinf yoki past (ballni ko'tarishga vaqti bor).
+   Qolgani - rad, telefon so'ralmaydi. */
 const FIT_SINF = ['8-sinf','9-sinf','10-sinf','11-sinf','Gap year'];
 /* '7.0+' - eski variant (12-14.09 gacha), jadvaldagi eski qatorlar uchun qoldirildi */
 const FIT_IELTS = ['8.0+','7.0-7.5','7.0+'];
+const YELLOW_SINF = ['8-sinf','9-sinf','10-sinf'];
 function fitCheck(){
   return {
     ielts: FIT_IELTS.indexOf(answers.ingliz) !== -1,
     sinf:  FIT_SINF.indexOf(answers.sinf) !== -1
   };
 }
-function isFit(){
+/* 'Green' | 'Yellow' | '' (rad) */
+function leadColor(){
   const f = fitCheck();
-  return f.ielts && f.sinf;
+  if(f.ielts && f.sinf) return 'Green';
+  if(answers.ingliz === '6.5' && YELLOW_SINF.indexOf(answers.sinf) !== -1) return 'Yellow';
+  return '';
 }
+function isFit(){ return leadColor() !== ''; }
 /* Tanlangan javobning ekrandagi inglizcha nomi ("7.0+" -> "7.0 and above") */
 function labelOf(qid){
   const q = QUESTIONS.filter(function(x){ return x.id === qid; })[0];
@@ -915,8 +922,10 @@ function keepInView(){
    SCORING
    ============================================================ */
 function grade(){
-  const fit = isFit();
-  return { score: fit ? 100 : 0, tier: fit ? 'HOT' : 'NURTURE', tags: [] };
+  const c = leadColor();
+  if(c === 'Green')  return { score: 100, tier: 'HOT',  tags: [] };
+  if(c === 'Yellow') return { score: 60,  tier: 'WARM', tags: [] };
+  return { score: 0, tier: 'NURTURE', tags: [] };
 }
 
 /* ============================================================
@@ -983,7 +992,7 @@ function submit(){
        with this id, so Meta counts one event, not two. */
     fbq('track', 'Lead', {}, { eventID: sessionId });
     /* Bu qadamga faqat mos kelganlar yetadi - Meta aynan shunday odamlarni qidirishni o'rganadi */
-    fbq('track', 'CompleteRegistration', { value: 100, currency: 'USD' }, { eventID: sessionId + '_q' });
+    fbq('track', 'CompleteRegistration', { value: grade().score, currency: 'USD' }, { eventID: sessionId + '_q' });
   }
   if(typeof tgp === 'function') tgp('event', '4HGABMb6-Ix8DtlHR'); // Telegram Ads: Lead
   post(payload('lead')).then(showFinal);

@@ -542,26 +542,37 @@ function markStarted(){
 
 /* ============================================================
    FILTR — kim dasturga mos keladi
-   IELTS 7.0+  VA  8–11-sinf yoki gap year.
-   Apps Script'dagi scoreColor() bilan bir xil qoida (Green / Red).
+   Green : IELTS 7.0+ (8.0+ yoki 7.0-7.5)  VA  8–11-sinf yoki gap year.
+   Yellow: IELTS 6.5  VA  10-sinf yoki past — ballni ko'tarishga hali vaqti bor,
+           shuning uchun lidni olamiz, lekin past ustuvorlik bilan.
+   Qolgani — rad. Apps Script'dagi scoreColor() bilan bir xil qoida.
    ============================================================ */
 const FIT_SINF = ['8-sinf','9-sinf','10-sinf','11-sinf','Gap year'];
 /* '7.0+' - eski variant (12-14.09 gacha), jadvaldagi eski qatorlar uchun qoldirildi */
 const FIT_IELTS = ['8.0+','7.0-7.5','7.0+'];
+/* 6.5 uchun istisno: faqat 10-sinf va past (11-sinf va gap year'ga ulgurmaydi) */
+const YELLOW_SINF = ['8-sinf','9-sinf','10-sinf'];
+
 function fitCheck(a){
   return {
     ielts: FIT_IELTS.indexOf(a.ingliz) !== -1,
     sinf:  FIT_SINF.indexOf(a.sinf) !== -1
   };
 }
-function isFit(a){
+/* 'Green' | 'Yellow' | '' (rad) */
+function leadColor(a){
   const f = fitCheck(a);
-  return f.ielts && f.sinf;
+  if(f.ielts && f.sinf) return 'Green';
+  if(a.ingliz === '6.5' && YELLOW_SINF.indexOf(a.sinf) !== -1) return 'Yellow';
+  return '';
 }
-/* Jadval va CompleteRegistration uchun: mos = HOT/100, qolgani = NURTURE/0 */
+function isFit(a){ return leadColor(a) !== ''; }
+/* Jadval va CompleteRegistration uchun */
 function grade(a){
-  const fit = isFit(a);
-  return { score: fit ? 100 : 0, tier: fit ? 'HOT' : 'NURTURE' };
+  const c = leadColor(a);
+  if(c === 'Green')  return { score: 100, tier: 'HOT' };
+  if(c === 'Yellow') return { score: 60,  tier: 'WARM' };
+  return { score: 0, tier: 'NURTURE' };
 }
 
 /* ============================================================
@@ -729,7 +740,7 @@ function leadNow(){
     /* eventID = sessionId (CAPI bilan dedup) */
     fbq('track', 'Lead', {}, { eventID: sessionId });
     /* Faqat mos kelganlar — Meta aynan shunday odamlarni qidirishni o'rganadi */
-    fbq('track', 'CompleteRegistration', { value: 100, currency: 'USD' }, { eventID: sessionId + '_q' });
+    fbq('track', 'CompleteRegistration', { value: grade(currentAnswers()).score, currency: 'USD' }, { eventID: sessionId + '_q' });
   }
   if(typeof tgp === 'function') tgp('event', '4HGABMb6-Ix8DtlHR'); /* Telegram Ads: Lead */
   post(payload('lead')).then(showFinal);
