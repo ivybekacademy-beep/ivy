@@ -338,11 +338,11 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
         <div class="step" data-step="ielts">
           <span class="lbl">IELTS ball</span>
           <div class="opts" data-key="ingliz">
-            <button type="button" class="opt" data-val="Hali yo'q">Hali yo'q</button>
+            <button type="button" class="opt" data-val="8.0+">8.0 va undan yuqori</button>
+            <button type="button" class="opt" data-val="7.0-7.5">7.0 – 7.5</button>
+            <button type="button" class="opt" data-val="6.5">6.5</button>
             <button type="button" class="opt" data-val="<6.0">6.0 dan past</button>
-            <button type="button" class="opt" data-val="6.0-6.5">6.0 – 6.5</button>
-            <button type="button" class="opt" data-val="6.5-7.0">6.5 – 7.0</button>
-            <button type="button" class="opt" data-val="7.0+">7.0 va undan yuqori</button>
+            <button type="button" class="opt" data-val="Hali yo'q">Hali yo'q</button>
           </div>
         </div>
 
@@ -354,6 +354,7 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
             <button type="button" class="opt" data-val="10-sinf">10-sinf</button>
             <button type="button" class="opt" data-val="11-sinf">11-sinf</button>
             <button type="button" class="opt" data-val="Gap year">Gap year</button>
+            <button type="button" class="opt" data-val="1-7 sinf">1–7 sinf</button>
             <button type="button" class="opt" data-val="Boshqa">Boshqa (12-sinf, talaba)</button>
           </div>
         </div>
@@ -364,7 +365,7 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
             <input class="input" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67">
             <span class="err" id="ePhone">Telefon raqamni to'liq kiriting</span>
           </label>
-          <button class="submit" id="sendBtn" type="submit">Bepul diagnostikasini oling →</button>
+          <button class="submit" id="sendBtn" type="submit">Diagnostika olish</button>
           <p class="privacy">Tugmani bosish orqali shaxsiy ma'lumotlaringizni qayta ishlashga rozilik bildirasiz. Raqamingizni faqat konsultatsiya uchun ishlatamiz.</p>
         </div>
       </form>
@@ -545,9 +546,11 @@ function markStarted(){
    Apps Script'dagi scoreColor() bilan bir xil qoida (Green / Red).
    ============================================================ */
 const FIT_SINF = ['8-sinf','9-sinf','10-sinf','11-sinf','Gap year'];
+/* '7.0+' - eski variant (12-14.09 gacha), jadvaldagi eski qatorlar uchun qoldirildi */
+const FIT_IELTS = ['8.0+','7.0-7.5','7.0+'];
 function fitCheck(a){
   return {
-    ielts: a.ingliz === '7.0+',
+    ielts: FIT_IELTS.indexOf(a.ingliz) !== -1,
     sinf:  FIT_SINF.indexOf(a.sinf) !== -1
   };
 }
@@ -660,9 +663,7 @@ function afterAnswer(key){
   if(key === 'sinf'){
     if(isFit(currentAnswers())){
       post(payload('answer'));
-      document.getElementById('wizStamp').textContent = 'Siz mos kelasiz ✓';
-      document.getElementById('wizStamp').hidden = false;
-      document.getElementById('formLead').textContent = "Tabriklaymiz — siz dasturimizga mos kelasiz! Menejer bog'lanishi uchun raqamingizni qoldiring.";
+      document.getElementById('formLead').textContent = "Oxirgi qadam qoldi";
       return true;   /* → telefon */
     }
     showNotFit();

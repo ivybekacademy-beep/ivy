@@ -638,11 +638,11 @@ const TELEGRAM_URL = 'https://t.me/ivybek_asadbek';
 const QUESTIONS = [
   { id:'ingliz', title:'What is your IELTS score?',
     opts:[
-      { v:"Hali yo'q", l:'I have not taken it yet' },
+      { v:'8.0+',      l:'8.0 and above' },
+      { v:'7.0-7.5',   l:'7.0 \u2013 7.5' },
+      { v:'6.5',       l:'6.5' },
       { v:'<6.0',      l:'Below 6.0' },
-      { v:'6.0-6.5',   l:'6.0 \u2013 6.5' },
-      { v:'6.5-7.0',   l:'6.5 \u2013 7.0' },
-      { v:'7.0+',      l:'7.0 and above' }
+      { v:"Hali yo'q", l:'I have not taken it yet' }
     ] },
 
   { id:'sinf', title:'What grade are you in?',
@@ -652,6 +652,7 @@ const QUESTIONS = [
       { v:'10-sinf',  l:'Grade 10' },
       { v:'11-sinf',  l:'Grade 11' },
       { v:'Gap year', l:'Gap year' },
+      { v:'1-7 sinf', l:'Grade 1\u20137' },
       { v:'Boshqa',   l:'Other (Grade 12, university student)' }
     ] }
 ];
@@ -727,9 +728,11 @@ function render(){
 /* Lead filtri (index.html dagi fitCheck bilan bir xil qoida):
    IELTS 7.0+ VA 8-11-sinf yoki gap year. Mos kelmasa telefon so'ralmaydi. */
 const FIT_SINF = ['8-sinf','9-sinf','10-sinf','11-sinf','Gap year'];
+/* '7.0+' - eski variant (12-14.09 gacha), jadvaldagi eski qatorlar uchun qoldirildi */
+const FIT_IELTS = ['8.0+','7.0-7.5','7.0+'];
 function fitCheck(){
   return {
-    ielts: answers.ingliz === '7.0+',
+    ielts: FIT_IELTS.indexOf(answers.ingliz) !== -1,
     sinf:  FIT_SINF.indexOf(answers.sinf) !== -1
   };
 }
@@ -848,8 +851,8 @@ function renderQuestion(q){
 function renderContact(){
   host.innerHTML = `
     <div class="q-count">Step ${TOTAL_STEPS} / ${TOTAL_STEPS}</div>
-    <h3 class="q-title">You are a match &mdash; leave your phone number</h3>
-    <p class="q-hint">Our team will call you to book your free consultation. We use your number only for this.</p>
+    <h3 class="q-title">One last step</h3>
+    <p class="q-hint">Leave your phone number &mdash; we use it only for this consultation.</p>
 
     <div class="field">
       <label for="fPhone">Phone number</label>
@@ -865,7 +868,7 @@ function renderContact(){
       <button type="button" class="btn btn-back" id="backBtn" aria-label="Back">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <button type="button" class="btn" id="sendBtn">Submit application</button>
+      <button type="button" class="btn" id="sendBtn">Get the diagnostic</button>
     </div>
     <p class="note">Your details stay private.</p>`;
 
