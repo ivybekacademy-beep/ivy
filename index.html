@@ -381,7 +381,9 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
 /* Прокрутив мимо героя, вернуться к форме было нечем: ни шапки, ни
    повторного CTA, кроме одной кнопки в самом низу страницы */
 .sticky-cta{
-  position:fixed;left:12px;right:12px;bottom:12px;z-index:50;
+  position:fixed;left:12px;right:12px;z-index:50;
+  /* iOS: без safe-area кнопка прячется под домашний индикатор */
+  bottom:calc(12px + env(safe-area-inset-bottom, 0px));
   display:none;align-items:center;justify-content:center;
   min-height:52px;padding:14px 18px;
   background:#EFFF33;color:#0B0B0D;
@@ -393,6 +395,20 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
 .sticky-cta.on{transform:none;}
 @media (max-width:900px){.sticky-cta{display:flex;}}
 @media (prefers-reduced-motion:reduce){.sticky-cta{transition:none;}}
+/* Телефон: на экране iPhone видно ~700px, и всё это место до первого
+   вопроса съедала «шапка». Убираем декоративное, поджимаем отступы. */
+@media (max-width:640px){
+  .hero-head{padding-top:14px;}
+  .hero-head img{height:34px;}
+  .hero-grid{padding-top:16px;gap:18px;}
+  .badge{display:none;}
+  .fcard{padding-top:18px;}
+  .wiz-bar{margin-bottom:14px;}
+  /* Длинный вводный абзац скрыт только на первом шаге: дальше он короткий
+     («Oxirgi qadam qoldi») и уже помогает, а не отодвигает вопрос */
+  .fcard.wiz-start .lead{display:none;}
+  .fcard.wiz-start h2{margin-bottom:16px;}
+}
 </style>
 </head>
 <body>
@@ -412,7 +428,7 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
     </div>
 
     <div id="ariza">
-      <form id="leadForm" class="fcard" novalidate>
+      <form id="leadForm" class="fcard wiz-start" novalidate>
         <div class="stamp" id="wizStamp" hidden>Ariza qabul qilindi ✓</div>
         <h2>Bepul diagnostikasi</h2>
         <p class="lead" id="formLead">Qisqa formani to'ldiring — menejerlarimiz siz bilan bog'lanib keyingi qadamlarni ko'rsatishadi.</p>
@@ -741,9 +757,23 @@ function showStep(i){
      на последнем — 75%, до 100% полоса не доходила никогда */
   document.getElementById('wizFill').style.width = Math.round((i + 1) / steps.length * 100) + '%';
   document.getElementById('wizBack').hidden = (i === 0);
+  document.getElementById('leadForm').classList.toggle('wiz-start', i === 0);
+  bringIntoView(document.querySelector('.fcard'));
   const inp = steps[i].querySelector('input');
   if(inp) setTimeout(function(){ inp.focus(); }, 250);
-  document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+/* block:'nearest' не делал ничего, если карточка видна хотя бы краем — а так
+   и было: низ со списком вариантов оставался под сгибом, и на телефоне
+   приходилось доскроливать руками к каждому вопросу. Прижимаем верх карточки
+   к верху экрана, когда она не помещается целиком. visualViewport учитывает
+   открытую клавиатуру, innerHeight — нет. */
+function bringIntoView(el){
+  if(!el) return;
+  const b = el.getBoundingClientRect();
+  const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  if(b.top >= 0 && b.bottom <= vh) return;
+  window.scrollTo({ top: Math.max(0, b.top + window.scrollY - 12), behavior:'smooth' });
 }
 
 function validateCurrent(){
@@ -890,7 +920,7 @@ function showFinal(){
   closeCtas();
   document.getElementById('leadForm').style.display = 'none';
   document.getElementById('successCard').classList.add('on');
-  document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  bringIntoView(document.getElementById('successCard'));
 }
 
 /* Mos kelmadi: telefon so'ralmaydi, qator "screened" bo'lib qoladi,
@@ -929,7 +959,7 @@ function showNotFit(){
   closeCtas();
   document.getElementById('leadForm').style.display = 'none';
   document.getElementById('notfitCard').classList.add('on');
-  document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  bringIntoView(document.getElementById('notfitCard'));
 }
 
 /* Липкая кнопка появляется, только когда с экрана ушли и форма,
