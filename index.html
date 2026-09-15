@@ -11,6 +11,8 @@
 <meta property="og:url" content="https://ivy.uz/">
 <meta property="og:image" content="https://ivy.uz/og.jpg">
 <meta name="theme-color" content="#2C5FF2">
+<link rel="alternate" hreflang="uz" href="https://ivy.uz/">
+<link rel="alternate" hreflang="en" href="https://ivy.uz/en.html">
 <link rel="icon" type="image/png" href="/favicon.png?v=2">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
@@ -63,9 +65,14 @@ body{
   display:flex;flex-direction:column;min-height:100vh;
 }
 a{color:inherit;text-decoration:none;}
+/* Клавиатурный фокус был виден только на .opt и .submit — на ссылках,
+   телефоне в шапке и нижней кнопке его не было вовсе */
+:where(a,button):focus-visible{outline:3px solid #EFFF33;outline-offset:3px;border-radius:6px;}
+.fcard :where(a,button):focus-visible{outline-color:#2C5FF2;}
 input,select,button{font-family:inherit;}
-input::placeholder{color:#9BA3B8;}
-select:invalid{color:#9BA3B8;}
+/* было #9BA3B8 — контраст 2.28:1 при норме AA 4.5:1 */
+input::placeholder{color:#676E80;}
+select:invalid{color:#676E80;}
 img{max-width:100%;}
 
 /* ---------- Top bar ---------- */
@@ -74,7 +81,15 @@ img{max-width:100%;}
   padding:9px 16px;font-size:12.5px;font-weight:500;
   line-height:1.45;letter-spacing:0.02em;
 }
+/* Без max-width это была одна строка в 148 знаков через весь монитор */
+.tb-full,.tb-short{display:block;max-width:74ch;margin:0 auto;}
 .topbar b{color:#EFFF33;font-weight:700;}
+.tb-short{display:none;}
+@media (max-width:640px){
+  /* На 375px баннер занимал 91px — 11% первого экрана. Короткая версия — две строки */
+  .tb-full{display:none;}
+  .tb-short{display:block;}
+}
 
 /* ---------- Hero ---------- */
 .hero{background:linear-gradient(160deg,#2E68F6 0%,#2C5FF2 55%,#2450DB 100%);color:#FFF;}
@@ -83,40 +98,73 @@ img{max-width:100%;}
   display:flex;align-items:center;justify-content:space-between;gap:16px;
 }
 .hero-head img{height:42px;width:auto;display:block;}
-.hero-head a.phone{color:#FFF;font-size:14.5px;font-weight:600;white-space:nowrap;}
+.hero-head a.phone{
+  display:inline-flex;align-items:center;min-height:44px;
+  color:#FFF;font-size:14.5px;font-weight:600;white-space:nowrap;
+}
 .hero-head a.phone:hover{color:#FFE01A;}
 .hero-grid{
   max-width:1080px;margin:0 auto;
-  padding:clamp(32px,5vw,60px) 24px clamp(40px,5vw,64px);
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-  gap:clamp(32px,4vw,56px);align-items:center;
+  padding:clamp(24px,5vw,60px) 24px clamp(32px,5vw,64px);
+  display:grid;grid-template-columns:minmax(0,1fr);
+  gap:24px;
+}
+/* В одну колонку карточка не растягивается во всю ширину планшета:
+   поле ввода на 740px выглядит как случайно растянутое */
+@media (max-width:900px){
+  #ariza{width:100%;max-width:560px;}
+}
+@media (min-width:901px){
+  /* Две колонки только когда обеим хватает места. Прежний
+     minmax(320px,1fr) не умел ужиматься: на 320px карточка формы
+     уезжала на 24px за экран, overflow-x:clip это прятал. */
+  .hero-grid{
+    grid-template-columns:minmax(0,1.1fr) minmax(0,0.9fr);
+    grid-template-areas:"copy form" "sub form";
+    column-gap:clamp(32px,4vw,56px);row-gap:0;
+    align-items:center;
+  }
+  .hero-copy{grid-area:copy;align-self:end;}
+  .hero .sub{grid-area:sub;align-self:start;margin-top:18px;}
+  #ariza{grid-area:form;}
 }
 .badge{
-  display:inline-flex;align-items:center;gap:10px;margin-bottom:20px;
+  display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;
   padding:8px 14px;border:1.5px solid rgba(255,255,255,0.45);border-radius:999px;
 }
 .badge .dot{width:8px;height:8px;border-radius:50%;background:#EFFF33;}
 .badge span:last-child{font-size:11.5px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;}
 .hero h1{
-  margin:0 0 18px;max-width:15ch;
+  margin:0;
   font-family:'Archivo','Arial Black',sans-serif;font-weight:900;font-stretch:110%;
-  font-size:clamp(26px,3vw,44px);line-height:1.06;letter-spacing:-0.015em;
+  /* Самое длинное слово — UNIVERSITETLARGA. В Archivo 900/110% его ширина
+     ровно 12.31 x font-size, поэтому размер считаем от доступной ширины:
+     при 3vw на 320-360px слово вылезало за край и обрезалось. */
+  font-size:clamp(21px,calc((100vw - 52px) / 12.4),46px);
+  line-height:1.2;letter-spacing:-0.015em;
   text-transform:uppercase;text-wrap:balance;
 }
+@media (min-width:901px){
+  /* Две колонки: доступно (1080 - паддинги - gap) * 1.1/2 */
+  .hero h1{font-size:clamp(30px,calc((min(1080px,100vw) - 104px) * 0.55 / 12.4),44px);}
+}
 .hero h1 .hl{
+  /* Вертикальный padding при line-height 1.06 наезжал на строку сверху */
   display:inline-block;background:#FFE01A;color:#0B0B0D;
-  padding:2px 12px 4px;transform:rotate(-1.2deg);
+  padding:0 12px 2px;line-height:1.06;
+  transform:rotate(-1.2deg);
 }
 .hero .sub{
+  margin:0;
   font-size:clamp(15px,1.4vw,16.5px);line-height:1.65;
-  color:rgba(255,255,255,0.92);max-width:30em;text-wrap:pretty;
+  color:rgba(255,255,255,0.92);max-width:32em;text-wrap:pretty;
 }
 
 /* ---------- Form card ---------- */
 #ariza{scroll-margin-top:20px;}
 .fcard{
   background:#FFF;color:#0B0B0D;border-radius:18px;
-  padding:clamp(22px,3vw,32px);
+  padding:clamp(20px,3vw,32px);
   box-shadow:0 28px 60px -30px rgba(11,20,60,0.55);
 }
 .fcard h2{
@@ -127,7 +175,10 @@ img{max-width:100%;}
 .fcard .lead{margin:0 0 20px;font-size:13.5px;line-height:1.6;color:#5A6172;}
 .fields{display:flex;flex-direction:column;gap:13px;}
 .field label{display:flex;flex-direction:column;gap:6px;}
-.field .lbl{
+/* Был `.field .lbl` — он не доставал до подписей «IELTS ball» и «Sinf»
+   (они лежат прямым потомком .step), и те рисовались обычным 16px/400 */
+.lbl{
+  display:block;
   font-size:12px;font-weight:700;letter-spacing:0.08em;
   text-transform:uppercase;color:#3C4356;
 }
@@ -168,29 +219,46 @@ input[type=tel].input{letter-spacing:0.02em;}
 .submit:active{transform:translateY(1px);}
 .submit:disabled{opacity:0.75;cursor:not-allowed;}
 .submit:focus-visible{outline:3px solid #2C5FF2;outline-offset:3px;}
-.privacy{margin-top:10px;font-size:11.5px;line-height:1.5;color:#8A90A3;text-align:center;}
+.privacy{margin-top:10px;font-size:11.5px;line-height:1.5;color:#676E80;text-align:center;}
 
 /* ---------- Wizard (savol-savol forma) ---------- */
 .wiz-top{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px;min-height:20px;}
 .wiz-back{
+  position:relative;
   background:none;border:none;padding:0;cursor:pointer;font-family:inherit;
-  font-size:13px;font-weight:600;color:#8A90A3;transition:color 120ms ease;
+  /* было #8A90A3 — контраст 3.18:1, и это единственный способ вернуться назад */
+  font-size:13px;font-weight:600;color:#5A6172;transition:color 120ms ease;
 }
+/* Зона тапа была 70x18 — доводим до 44px по высоте, не трогая вёрстку */
+.wiz-back::after{content:"";position:absolute;inset:-13px -10px;}
 .wiz-back:hover{color:#2C5FF2;}
-.wiz-count{margin-left:auto;font-size:12px;font-weight:700;letter-spacing:0.06em;color:#8A90A3;}
+.wiz-count{margin-left:auto;font-size:12px;font-weight:700;letter-spacing:0.06em;color:#676E80;}
 .wiz-bar{height:4px;background:#F2F3F7;border-radius:99px;overflow:hidden;margin:0 0 18px;}
 .wiz-bar span{display:block;height:100%;width:0;background:#2C5FF2;border-radius:99px;transition:width 250ms ease;}
 .step{display:none;}
 .step.on{display:flex;flex-direction:column;gap:13px;animation:stepIn 230ms ease;}
 @keyframes stepIn{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:none;}}
-.opts{display:flex;flex-direction:column;gap:9px;}
+.opts{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;}
+/* Короткие варианты («Sinf») — в две колонки: семь одинаковых плашек
+   подряд читались как сплошная серая простыня */
+.opts.two{grid-template-columns:repeat(auto-fit,minmax(132px,1fr));}
+.opts.two .opt.wide{grid-column:1 / -1;}
 .opt{
-  width:100%;text-align:left;padding:13px 16px;font-size:16px;font-weight:600;color:#0B0B0D;
+  display:flex;align-items:center;gap:12px;min-height:48px;
+  width:100%;text-align:left;padding:12px 14px;font-size:16px;font-weight:600;color:#0B0B0D;
   background:#F2F3F7;border:2px solid #F2F3F7;border-radius:10px;cursor:pointer;font-family:inherit;
   transition:border-color 120ms ease,background 120ms ease;
 }
+/* Кружок-радио: варианты выглядели как поля ввода, а не как выбор */
+.opt::before{
+  content:"";flex:none;width:18px;height:18px;border-radius:50%;
+  border:2px solid #C3CADB;background:#FFF;
+  transition:border-color 120ms ease,box-shadow 120ms ease,background 120ms ease;
+}
 .opt:hover{border-color:#2C5FF2;}
+.opt:hover::before{border-color:#2C5FF2;}
 .opt.sel{border-color:#2C5FF2;background:#EEF3FF;}
+.opt.sel::before{border-color:#2C5FF2;background:#2C5FF2;box-shadow:inset 0 0 0 3px #FFF;}
 .opt:focus-visible{outline:3px solid #2C5FF2;outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){.step.on{animation:none;}}
 
@@ -214,15 +282,22 @@ input[type=tel].input{letter-spacing:0.02em;}
   font-size:clamp(22px,2.4vw,28px);line-height:1.05;text-transform:uppercase;
 }
 .scard p{margin:0 0 22px;font-size:14.5px;line-height:1.65;color:rgba(255,255,255,0.8);}
+/* Галочка и крестик шли простым текстом в pre-line и переносились как попало */
+.req{list-style:none;display:flex;flex-direction:column;gap:10px;margin:0 0 22px;padding:0;}
+.req li{display:flex;gap:10px;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,0.8);}
+.req .mark{flex:none;font-weight:700;}
+.req .ok .mark{color:#7BE495;}
+.req .no{color:#FFF;}
+.req .no .mark{color:#FF8E8E;}
 .scard .row{display:flex;flex-wrap:wrap;gap:10px;}
 .btn-tg{
-  display:inline-flex;padding:12px 20px;background:#2C5FF2;color:#FFF;
+  display:inline-flex;align-items:center;min-height:44px;padding:12px 20px;background:#2C5FF2;color:#FFF;
   font-size:14px;font-weight:700;border-radius:10px;
   transition:background 150ms ease,color 150ms ease;
 }
 .btn-tg:hover{background:#EFFF33;color:#0B0B0D;}
 .btn-ig{
-  display:inline-flex;padding:12px 20px;background:transparent;color:#FFF;
+  display:inline-flex;align-items:center;min-height:44px;padding:12px 20px;background:transparent;color:#FFF;
   font-size:14px;font-weight:600;border:1.5px solid rgba(255,255,255,0.4);border-radius:10px;
   transition:border-color 150ms ease,color 150ms ease;
 }
@@ -293,25 +368,47 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
 }
 .foot-in .tag{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;}
 .foot-in nav{display:flex;align-items:center;gap:18px;font-size:13px;}
-.foot-in nav a{color:rgba(255,255,255,0.75);transition:color 150ms ease;}
+.foot-in nav a{position:relative;color:rgba(255,255,255,0.75);transition:color 150ms ease;}
+/* Зона тапа была 62x21 */
+.foot-in nav a::after{content:"";position:absolute;inset:-12px -8px;}
 .foot-in nav a:hover{color:#EFFF33;}
+@media (max-width:900px){
+  /* Место под липкую кнопку, чтобы она не накрывала подвал */
+  .foot-in{padding-bottom:84px;}
+}
+
+/* ---------- Липкая кнопка на телефоне ---------- */
+/* Прокрутив мимо героя, вернуться к форме было нечем: ни шапки, ни
+   повторного CTA, кроме одной кнопки в самом низу страницы */
+.sticky-cta{
+  position:fixed;left:12px;right:12px;bottom:12px;z-index:50;
+  display:none;align-items:center;justify-content:center;
+  min-height:52px;padding:14px 18px;
+  background:#EFFF33;color:#0B0B0D;
+  font-family:'Archivo',sans-serif;font-weight:900;font-stretch:105%;
+  font-size:14px;letter-spacing:0.04em;text-transform:uppercase;text-align:center;
+  border-radius:12px;box-shadow:0 14px 34px -12px rgba(11,20,60,0.65);
+  transform:translateY(calc(100% + 16px));transition:transform 220ms ease;
+}
+.sticky-cta.on{transform:none;}
+@media (max-width:900px){.sticky-cta{display:flex;}}
+@media (prefers-reduced-motion:reduce){.sticky-cta{transition:none;}}
 </style>
 </head>
 <body>
 
-<div class="topbar">Markaziy Osiyodagi ambitsiyali o'quvchilar va ularning ota-onalari uchun maxsus admissions dasturi — dunyoning <b>TOP-50</b> universitetlariga kirish uchun</div>
+<div class="topbar"><span class="tb-full">Markaziy Osiyodagi ambitsiyali o'quvchilar va ularning ota-onalari uchun maxsus admissions dasturi — dunyoning <b>TOP-50</b> universitetlariga kirish uchun</span><span class="tb-short">Dunyoning <b>TOP-50</b> universitetlariga kirish uchun admissions dasturi</span></div>
 
 <section class="hero">
   <div class="hero-head">
-    <img src="uploads/brandbook.webp" alt="Ivybek Academy">
+    <img src="uploads/brandbook.webp" width="388" height="168" fetchpriority="high" alt="Ivybek Academy">
     <a class="phone" href="tel:+998555885959">+998 55 588 59 59</a>
   </div>
 
   <div class="hero-grid">
-    <div>
+    <div class="hero-copy">
       <div class="badge"><span class="dot"></span><span>Ivybek Academy · Qabul 2026</span></div>
       <h1>Top-50 universitetlarga <span class="hl">100% grant</span> bilan kiring</h1>
-      <p class="sub">Loyihalar, ilmiy ishlar va esse ustida eng yaxshi mentorlar bilan ishlang va orzuingizdagi top universitetga qabul qilining.</p>
     </div>
 
     <div id="ariza">
@@ -348,14 +445,14 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
 
         <div class="step" data-step="sinf">
           <span class="lbl">Sinf</span>
-          <div class="opts" data-key="sinf">
+          <div class="opts two" data-key="sinf">
             <button type="button" class="opt" data-val="8-sinf">8-sinf</button>
             <button type="button" class="opt" data-val="9-sinf">9-sinf</button>
             <button type="button" class="opt" data-val="10-sinf">10-sinf</button>
             <button type="button" class="opt" data-val="11-sinf">11-sinf</button>
             <button type="button" class="opt" data-val="Gap year">Gap year</button>
             <button type="button" class="opt" data-val="1-7 sinf">1–7 sinf</button>
-            <button type="button" class="opt" data-val="Boshqa">Boshqa (12-sinf, talaba)</button>
+            <button type="button" class="opt wide" data-val="Boshqa">Boshqa (12-sinf, talaba)</button>
           </div>
         </div>
 
@@ -374,17 +471,27 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
         <div class="stamp">Ariza qabul qilindi ✓</div>
         <h2>Ro'yxatdan o'tdingiz</h2>
         <p>Jamoamiz <b id="succPhone"></b> shu raqamingizga tez orada bog'lanishadi</p>
+        <div class="row">
+          <a class="btn-tg" href="https://t.me/ivybek_asadbek" target="_blank" rel="noopener">Telegram kanalga o'tish</a>
+          <a class="btn-ig" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Instagram</a>
+        </div>
       </div>
 
       <div class="scard" id="notfitCard">
         <div class="stamp">Natija</div>
         <h2>Hozircha mos kelmaysiz</h2>
         <p>Dasturimizga kirish uchun minimal talablar:</p>
-        <p id="notfitList" style="white-space:pre-line;"></p>
+        <ul class="req" id="notfitList"></ul>
         <p>Natijalaringiz shu darajaga yetganda qayta ariza qoldiring — sizni kutamiz.</p>
+        <div class="row">
+          <a class="btn-tg" href="https://t.me/ivybek_asadbek" target="_blank" rel="noopener">Telegram kanal</a>
+          <a class="btn-ig" href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Instagram</a>
+        </div>
       </div>
 
     </div>
+
+    <p class="sub">Loyihalar, ilmiy ishlar va esse ustida eng yaxshi mentorlar bilan ishlang va orzuingizdagi top universitetga qabul qilining.</p>
   </div>
 </section>
 
@@ -397,28 +504,28 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
 <section class="results">
   <div class="marquee">
     <div class="marquee-track">
-      <img src="uploads/01.webp" width="540" height="675" decoding="async" alt="Tsinghua University — Top 15 worldwide">
-      <img src="uploads/1.webp" width="540" height="675" decoding="async" alt="Ivybek o'quvchisi — qabul natijasi">
-      <img src="uploads/2.webp" width="540" height="675" decoding="async" alt="Ivybek o'quvchisi — qabul natijasi">
-      <img src="uploads/10.webp" width="540" height="675" loading="lazy" decoding="async" alt="MIT — $385,000">
-      <img src="uploads/4.webp" width="540" height="675" loading="lazy" decoding="async" alt="Carnegie Mellon University Qatar">
-      <img src="uploads/11.webp" width="540" height="675" loading="lazy" decoding="async" alt="MIT — $385,000">
-      <img src="uploads/3.webp" width="540" height="675" loading="lazy" decoding="async" alt="HKUST — Top 33">
-      <img src="uploads/5.webp" width="540" height="675" loading="lazy" decoding="async" alt="NYU Abu Dhabi — Top 31, $354,000">
-      <img src="uploads/6.webp" width="540" height="675" loading="lazy" decoding="async" alt="Carnegie Mellon University Qatar — Top 24, $320,000">
-      <img src="uploads/7.webp" width="540" height="675" loading="lazy" decoding="async" alt="University College London — Top 8, $165,000">
-      <img src="uploads/9.webp" width="540" height="675" loading="lazy" decoding="async" alt="CUHK — Top 18, $110,000">
-      <img src="uploads/01.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/1.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/2.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/10.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/4.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/11.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/3.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/5.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/6.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/7.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
-      <img src="uploads/9.webp" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/01.webp" fetchpriority="low" width="540" height="675" decoding="async" alt="Tsinghua University — Top 15 worldwide">
+      <img src="uploads/1.webp" fetchpriority="low" width="540" height="675" decoding="async" alt="Ivybek o'quvchisi — qabul natijasi">
+      <img src="uploads/2.webp" fetchpriority="low" width="540" height="675" decoding="async" alt="Ivybek o'quvchisi — qabul natijasi">
+      <img src="uploads/10.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="MIT — $385,000">
+      <img src="uploads/4.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="Carnegie Mellon University Qatar">
+      <img src="uploads/11.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="MIT — $385,000">
+      <img src="uploads/3.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="HKUST — Top 33">
+      <img src="uploads/5.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="NYU Abu Dhabi — Top 31, $354,000">
+      <img src="uploads/6.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="Carnegie Mellon University Qatar — Top 24, $320,000">
+      <img src="uploads/7.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="University College London — Top 8, $165,000">
+      <img src="uploads/9.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="CUHK — Top 18, $110,000">
+      <img src="uploads/01.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/1.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/2.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/10.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/4.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/11.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/3.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/5.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/6.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/7.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
+      <img src="uploads/9.webp" fetchpriority="low" width="540" height="675" loading="lazy" decoding="async" alt="" aria-hidden="true">
     </div>
   </div>
 
@@ -431,11 +538,14 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
   <div class="foot-in">
     <span class="tag">Ivybek Academy · Central Asia's leading college admissions program</span>
     <nav>
+      <a href="/en.html" hreflang="en">English</a>
       <a href="https://t.me/ivybek_asadbek" target="_blank" rel="noopener">Telegram</a>
       <a href="https://www.instagram.com/ivybek_com/" target="_blank" rel="noopener">Instagram</a>
     </nav>
   </div>
 </footer>
+
+<a href="#ariza" class="sticky-cta" id="stickyCta">Bepul diagnostika olish&nbsp;→</a>
 
 <script>
 'use strict';
@@ -493,6 +603,7 @@ function fixLocal(d){
 
 const nameEl = document.getElementById('fName');
 const phoneEl = document.getElementById('fPhone');
+const stickyCta = document.getElementById('stickyCta');
 
 /* Tanlov-savollar javoblari (select o'rniga tugmalar) */
 /* gpa endi so'ralmaydi, lekin kalit qoladi: Apps Script ustuni bo'sh yoziladi */
@@ -626,7 +737,9 @@ function showStep(i){
   stepIdx = i;
   steps[i].classList.add('on');
   document.getElementById('wizCount').textContent = (i + 1) + ' / ' + steps.length;
-  document.getElementById('wizFill').style.width = Math.round(i / steps.length * 100) + '%';
+  /* было i/steps.length: на первом шаге «1 / 4» и пустая полоса,
+     на последнем — 75%, до 100% полоса не доходила никогда */
+  document.getElementById('wizFill').style.width = Math.round((i + 1) / steps.length * 100) + '%';
   document.getElementById('wizBack').hidden = (i === 0);
   const inp = steps[i].querySelector('input');
   if(inp) setTimeout(function(){ inp.focus(); }, 250);
@@ -748,11 +861,33 @@ function leadNow(){
 }
 
 let finalShown = false;
+
+/* После отправки нижняя кнопка вела на #ariza, где формы уже нет —
+   переводим её на Telegram и убираем липкую кнопку */
+function closeCtas(){
+  if(stickyCta){ stickyCta.classList.remove('on'); stickyCta.hidden = true; }
+  const cta = document.querySelector('.cta');
+  if(cta){
+    cta.href = 'https://t.me/ivybek_asadbek';
+    cta.target = '_blank';
+    cta.rel = 'noopener';
+    cta.textContent = '';
+    const wrap = document.createElement('span');
+    wrap.textContent = "Telegram kanalga o'tish\u00A0";
+    const arrow = document.createElement('span');
+    arrow.className = 'arrow';
+    arrow.textContent = '→';
+    wrap.appendChild(arrow);
+    cta.appendChild(wrap);
+  }
+}
+
 function showFinal(){
   if(finalShown) return;
   finalShown = true;
   const digits = fixLocal(phoneEl.value.replace(/\D/g,''));
   document.getElementById('succPhone').textContent = digits ? formatPhone(digits) : "ko'rsatilgan raqam";
+  closeCtas();
   document.getElementById('leadForm').style.display = 'none';
   document.getElementById('successCard').classList.add('on');
   document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
@@ -765,15 +900,51 @@ function showNotFit(){
   finalShown = true;
   const a = currentAnswers();
   const f = fitCheck(a);
+  /* показываем подпись кнопки («6.0 dan past»), а не служебное значение («<6.0») */
+  function labelFor(key, val){
+    const box = document.querySelector('.opts[data-key="' + key + '"]');
+    if(!box) return val;
+    const btn = Array.prototype.slice.call(box.querySelectorAll('.opt'))
+      .filter(function(b){ return b.dataset.val === val; })[0];
+    return btn ? btn.textContent.trim() : val;
+  }
   const rows = [
-    (f.ielts ? '✓' : '✗') + ' IELTS 7.0 va undan yuqori' + (f.ielts ? '' : ' (sizda: ' + (a.ingliz || '—') + ')'),
-    (f.sinf  ? '✓' : '✗') + ' 8–11-sinf yoki gap year' + (f.sinf ? '' : ' (sizda: ' + (a.sinf || '—') + ')')
+    { ok: f.ielts, text: 'IELTS 7.0 va undan yuqori', got: labelFor('ingliz', a.ingliz) },
+    { ok: f.sinf,  text: '8–11-sinf yoki gap year',   got: labelFor('sinf', a.sinf) }
   ];
-  document.getElementById('notfitList').textContent = rows.join('\n');
+  const list = document.getElementById('notfitList');
+  list.textContent = '';
+  rows.forEach(function(r){
+    const li = document.createElement('li');
+    li.className = r.ok ? 'ok' : 'no';
+    const mark = document.createElement('span');
+    mark.className = 'mark';
+    mark.textContent = r.ok ? '✓' : '✗';
+    const txt = document.createElement('span');
+    txt.textContent = r.text + (r.ok ? '' : ' (sizda: ' + (r.got || '—') + ')');
+    li.appendChild(mark); li.appendChild(txt);
+    list.appendChild(li);
+  });
   post(payload('screened'));
+  closeCtas();
   document.getElementById('leadForm').style.display = 'none';
   document.getElementById('notfitCard').classList.add('on');
   document.getElementById('ariza').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+/* Липкая кнопка появляется, только когда с экрана ушли и форма,
+   и нижняя кнопка — иначе два одинаковых CTA стоят друг на друге */
+if(stickyCta && 'IntersectionObserver' in window){
+  const anchors = [document.getElementById('ariza'), document.querySelector('.cta-wrap')].filter(Boolean);
+  const seen = new Map();
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ seen.set(e.target, e.isIntersecting); });
+    if(finalShown) return;
+    let any = false;
+    seen.forEach(function(v){ if(v) any = true; });
+    stickyCta.classList.toggle('on', !any);
+  }, { threshold: 0.12 });
+  anchors.forEach(function(el){ io.observe(el); });
 }
 
 /* Karusel ekranda bo'lmaganda animatsiya to'xtaydi — CPU va batareya tejaladi */
