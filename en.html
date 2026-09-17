@@ -41,15 +41,28 @@ window.tgp = window.tgp || function(){
 tgp.queue = tgp.queue || [];
 tgp('init', '4HGABMb6');
 
-/* Скрипты пикселей — после события load. Раньше они стартовали через
-   15 мс после HTML и на медленной сети забирали канал у шрифтов, от
-   которых зависит первая отрисовка заголовка. Вызовы fbq()/tgp() до
-   загрузки копятся в очереди и уходят, когда скрипты придут. */
-window.addEventListener('load', function(){
-  ['https://connect.facebook.net/en_US/fbevents.js', 'https://telegram.org/js/pixel.js'].forEach(function(src){
-    var s = document.createElement('script'); s.async = true; s.src = src; document.head.appendChild(s);
-  });
-});
+/* Скрипты пикселей — после первой отрисовки, а не по load. Раньше они
+   стартовали через 15 мс после HTML и на медленной сети забирали канал у
+   шрифтов, от которых зависит заголовок; load тут не годится — в
+   Lighthouse он бывает раньше первого кадра, и 190 КБ пикселей всё равно
+   попадают в критический путь LCP. Ждём first-contentful-paint; если
+   события нет 6 с (старый браузер) — грузим по таймеру. Вызовы fbq()/tgp()
+   до загрузки копятся в очереди и уходят, когда скрипты придут. */
+(function(){
+  var done = false;
+  function loadPixels(){
+    if(done) return; done = true;
+    ['https://connect.facebook.net/en_US/fbevents.js', 'https://telegram.org/js/pixel.js'].forEach(function(src){
+      var s = document.createElement('script'); s.async = true; s.src = src; document.head.appendChild(s);
+    });
+  }
+  try{
+    new PerformanceObserver(function(list, obs){
+      if(list.getEntriesByName('first-contentful-paint').length){ obs.disconnect(); setTimeout(loadPixels, 250); }
+    }).observe({ type:'paint', buffered:true });
+  }catch(e){ window.addEventListener('load', loadPixels); }
+  setTimeout(loadPixels, 6000);
+})();
 
 </script>
 <!-- Piksellar darhol yuklanadi: kechiktirilsa PageView / Landing view yo'qoladi va reklama o'lchovi buziladi -->
