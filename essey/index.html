@@ -1,13 +1,15 @@
 <!doctype html>
-<html lang="uz">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Essay dasturi — IVYBEK Academy</title>
-<meta name="description" content="Top-50 universitetlarga kiradigan essay yozish dasturi. Arizangizni qoldiring — profilingizni ko'rib chiqamiz.">
+<title>Essay programme &mdash; IVYBEK Academy</title>
+<meta name="description" content="Turn your story into a Top-50 essay. Send us your grade, IELTS and SAT for a free consultation.">
 <link rel="icon" href="/favicon.png">
-<meta property="og:title" content="Essay dasturi — IVYBEK Academy">
-<meta property="og:description" content="Top-50 universitetlarga kiradigan essay yozish dasturi.">
+<link rel="canonical" href="https://ivy.uz/essey/">
+<link rel="alternate" hreflang="uz" href="https://ivy.uz/essey/uz/">
+<meta property="og:title" content="Essay programme &mdash; IVYBEK Academy">
+<meta property="og:description" content="Turn your story into a Top-50 essay. Send us your grade, IELTS and SAT for a free consultation.">
 <meta property="og:image" content="https://ivy.uz/og.jpg">
 <meta property="og:url" content="https://ivy.uz/essey/">
 <meta property="og:type" content="website">
@@ -25,8 +27,10 @@ a{color:inherit;text-decoration:none;}
 :where(a,button):focus-visible{outline:3px solid #2C5FF2;outline-offset:3px;border-radius:6px;}
 input,select,button{font-family:inherit;}
 .wrap{max-width:720px;margin:0 auto;padding:0 16px;}
-header{padding:20px 0;}
+header{padding:20px 0;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Archivo',Arial Black,sans-serif;font-weight:900;font-stretch:110%;font-size:20px;letter-spacing:-0.01em;}
+.lang{font-size:13px;font-weight:600;border:1.5px solid #D9D9D2;border-radius:999px;padding:5px 12px;}
+.lang:hover{background:#0B0B0D;color:#EFFF33;border-color:#0B0B0D;}
 .hero{padding:16px 0 28px;}
 .kicker{display:inline-block;background:#EFFF33;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;}
 h1{font-family:'Archivo',Arial Black,sans-serif;font-weight:900;font-stretch:110%;font-size:clamp(30px,7vw,46px);line-height:1.04;letter-spacing:-0.02em;margin:14px 0 12px;}
@@ -60,78 +64,66 @@ footer{padding:24px 0 40px;font-size:13px;color:#7A7A85;}
 </style>
 </head>
 <body>
-<header><div class="wrap"><a href="/" class="logo">IVYBEK</a></div></header>
+<header class="wrap"><a href="/" class="logo">IVYBEK</a><a class="lang" href="/essey/uz/">UZ</a></header>
 
 <main class="wrap">
   <section class="hero">
-    <span class="kicker">Essay dasturi</span>
-    <h1>Essayingiz sizni <em>Top-50</em>ga olib kiradigan qilib yozamiz</h1>
-    <p class="sub">Ariza qoldiring — profilingizni (SAT, GPA, IELTS, sinf) ko'rib chiqamiz va dastur sizga mos kelishini aytamiz.</p>
+    <span class="kicker">Essay programme</span>
+    <h1>Turn your story into a <em>Top-50</em> essay</h1>
+    <p class="sub">In 2026, 55+ IVYBEK students got into Top-50 universities. Send us your grade, IELTS and SAT, and our team will give you a free consultation.</p>
     <ul class="pts">
-      <li><b>1</b><span>Profilingizni tahlil qilamiz va kuchli tomoningizni topamiz</span></li>
-      <li><b>2</b><span>Essay mavzusi va tuzilmasini birga ishlab chiqamiz</span></li>
-      <li><b>3</b><span>Qoralamani bosqichma-bosqich tahrir qilamiz</span></li>
+      <li><b>1</b><span>We analyse your profile and find your strongest angle</span></li>
+      <li><b>2</b><span>We shape the topic and the structure together</span></li>
+      <li><b>3</b><span>We edit your draft step by step</span></li>
     </ul>
   </section>
 
-  <section class="fcard" id="ariza">
+  <section class="fcard" id="apply">
     <div id="formBox">
-      <h2>Dasturga ariza</h2>
-      <p class="lead">Formani to'ldiring — jamoamiz siz bilan bog'lanadi.</p>
+      <h2>Apply to the programme</h2>
+      <p class="lead">Fill in the form &mdash; our team will get in touch.</p>
       <form class="f" id="essayForm" novalidate>
         <div class="fld" id="wName">
-          <label for="fName">Ism familiya</label>
+          <label for="fName">Full name</label>
           <input class="input" id="fName" type="text" autocomplete="name" placeholder="Aziza Karimova">
-          <span class="err">Ismingizni kiriting</span>
+          <span class="err">Please enter your name</span>
         </div>
         <div class="fld" id="wPhone">
-          <label for="fPhone">Telefon raqam</label>
+          <label for="fPhone">Phone number</label>
           <input class="input" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67">
-          <span class="err">Telefon raqamni to'liq kiriting</span>
+          <span class="err">Please enter the full phone number</span>
         </div>
         <div class="fld" id="wSinf">
-          <label for="fSinf">Sinf</label>
-          <select id="fSinf">
-            <option value="">Tanlang</option>
-            <option>8-sinf</option><option>9-sinf</option><option>10-sinf</option><option>11-sinf</option>
-            <option>Maktabni tugatganman</option>
-          </select>
-          <span class="err">Sinfni tanlang</span>
+          <label for="fSinf">Grade</label>
+          <select id="fSinf"><option value="">Select</option><option>8th grade</option><option>9th grade</option><option>10th grade</option><option>11th grade</option><option>Graduated</option></select>
+          <span class="err">Please select your grade</span>
         </div>
         <div class="row">
           <div class="fld" id="wIelts">
             <label for="fIelts">IELTS</label>
-            <select id="fIelts">
-              <option value="">Tanlang</option>
-              <option>8.0+</option><option>7.0-7.5</option><option>6.5</option><option>6.0</option>
-              <option>6.0 dan past</option><option>Hali topshirmaganman</option>
-            </select>
-            <span class="err">IELTS darajasini tanlang</span>
+            <select id="fIelts"><option value="">Select</option><option>8.0+</option><option>7.0-7.5</option><option>6.5</option><option>6.0</option><option>Below 6.0</option><option>Not taken yet</option></select>
+            <span class="err">Please select your IELTS level</span>
           </div>
           <div class="fld" id="wSat">
             <label for="fSat">SAT</label>
-            <select id="fSat">
-              <option value="">Tanlang</option>
-              <option>1500+</option><option>1400-1490</option><option>1300-1390</option>
-              <option>1200-1290</option><option>1200 dan past</option><option>Hali topshirmaganman</option>
-            </select>
-            <span class="err">SAT darajasini tanlang</span>
+            <select id="fSat"><option value="">Select</option><option>1500+</option><option>1400-1490</option><option>1300-1390</option><option>1200-1290</option><option>Below 1200</option><option>Not taken yet</option></select>
+            <span class="err">Please select your SAT level</span>
           </div>
         </div>
         <div class="fld" id="wGpa">
-          <label for="fGpa">GPA <span class="hint">— 5 yoki 4 ballik tizimda, masalan 4.8 yoki 3.7</span></label>
+          <label for="fGpa">GPA <span class="hint">&mdash; on a 5- or 4-point scale, e.g. 4.8 or 3.7</span></label>
           <input class="input" id="fGpa" type="text" inputmode="decimal" placeholder="4.5">
-          <span class="err">GPA ni kiriting</span>
+          <span class="err">Please enter your GPA</span>
         </div>
-        <button class="submit" id="sendBtn" type="submit">Arizani yuborish</button>
-        <p class="note">Ma'lumotlaringiz faqat jamoamizda qoladi.</p>
+        <button class="submit" id="sendBtn" type="submit">Apply now</button>
+        <p class="note">30 seconds &middot; 6 quick fields</p>
       </form>
     </div>
 
     <div class="scard" id="okCard">
       <div class="tick">&#10003;</div>
-      <h2>Arizangiz qabul qilindi</h2>
-      <p>Jamoamiz <b id="okPhone"></b> raqamingizga tez orada bog'lanadi.</p>
+      <h2>Application received</h2>
+      <p>Our team will call you at <b id="okPhone"></b> shortly.</p>
     </div>
   </section>
 </main>
@@ -140,6 +132,8 @@ footer{padding:24px 0 40px;font-size:13px;color:#7A7A85;}
 
 <script>
 var ENDPOINT = 'https://script.google.com/macros/s/AKfycbyxUvB4orjFR9_oiuXZSOHrcjC1UZefbe9XQxtGSSIKmE47OIPDdq15dYz7FXLsk52T/exec';
+var LANG = 'en';
+var SENDING = 'Sending...';
 var sessionId = 's_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
 
 var utm = (function(){
@@ -159,7 +153,6 @@ function metaIds(){
   return o;
 }
 
-/* telefon maskasi: +998 90 123 45 67 */
 var phoneEl = document.getElementById('fPhone');
 function fixLocal(d){
   d = d.replace(/\D/g,'');
@@ -177,18 +170,15 @@ function fmt(d){
 }
 phoneEl.addEventListener('focus', function(){ if(!phoneEl.value) phoneEl.value = '+998 '; });
 phoneEl.addEventListener('input', function(){ phoneEl.value = fmt(fixLocal(phoneEl.value)); });
-
 function digits(){ return fixLocal(phoneEl.value); }
 function phoneOk(){ return digits().length === 12; }
-
 function mark(id, bad){ document.getElementById(id).classList.toggle('bad', bad); }
 
-function score(a){
-  var s = 0;
+function grade(a){
   var i = {'8.0+':40,'7.0-7.5':34,'6.5':24,'6.0':16}[a.ingliz] || 0;
   var t = {'1500+':40,'1400-1490':34,'1300-1390':24,'1200-1290':16}[a.sat] || 0;
-  var c = {'11-sinf':20,'10-sinf':18,'9-sinf':14,'8-sinf':10,'Maktabni tugatganman':12}[a.sinf] || 0;
-  s = i + t + c;
+  var c = (a.sinf.indexOf('11') === 0 ? 20 : a.sinf.indexOf('10') === 0 ? 18 : a.sinf.indexOf('9') === 0 ? 14 : a.sinf.indexOf('8') === 0 ? 10 : 12);
+  var s = i + t + c;
   return { score: s, tier: s >= 70 ? 'HOT' : (s >= 40 ? 'WARM' : 'NURTURE') };
 }
 
@@ -200,7 +190,7 @@ function payload(type){
     sat: document.getElementById('fSat').value
   };
   var gpa = document.getElementById('fGpa').value.trim();
-  var g = score(a);
+  var g = grade(a);
   var d = digits();
   return Object.assign({
     type: type, sessionId: sessionId,
@@ -208,7 +198,7 @@ function payload(type){
     phone: d.length === 12 ? '+' + d : '',
     telegram: '',
     score: g.score, tier: g.tier,
-    tags: 'program=essay; gpa=' + (gpa || '-'),
+    tags: 'program=essay; lang=' + LANG + '; gpa=' + (gpa || '-'),
     ua: navigator.userAgent,
     page: location.href,
     ts: new Date().toISOString()
@@ -233,9 +223,8 @@ document.getElementById('essayForm').addEventListener('submit', function(e){
   mark('wName', !nameOk); mark('wPhone', !phoneOk()); mark('wSinf', !sinfOk);
   mark('wIelts', !ieltsOk); mark('wSat', !satOk); mark('wGpa', !gpaOk);
   if(!(nameOk && phoneOk() && sinfOk && ieltsOk && satOk && gpaOk)) return;
-
   var btn = document.getElementById('sendBtn');
-  btn.disabled = true; btn.textContent = 'Yuborilmoqda...';
+  btn.disabled = true; btn.textContent = SENDING;
   var d = payload('lead');
   post(d).then(function(){
     document.getElementById('okPhone').textContent = d.phone;
