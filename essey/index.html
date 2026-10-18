@@ -95,13 +95,13 @@ footer{padding:24px 0 40px;font-size:13px;color:#7A7A85;}
         </div>
         <div class="fld" id="wSinf">
           <label for="fSinf">Grade</label>
-          <select id="fSinf"><option value="">Select</option><option>8th grade</option><option>9th grade</option><option>10th grade</option><option>11th grade</option><option>Graduated</option></select>
+          <select id="fSinf"><option value="">Select</option><option value="8-sinf">8th grade</option><option value="9-sinf">9th grade</option><option value="10-sinf">10th grade</option><option value="11-sinf">11th grade</option><option value="Gap year">Graduated / gap year</option></select>
           <span class="err">Please select your grade</span>
         </div>
         <div class="row">
           <div class="fld" id="wIelts">
             <label for="fIelts">IELTS</label>
-            <select id="fIelts"><option value="">Select</option><option>8.0+</option><option>7.0-7.5</option><option>6.5</option><option>6.0</option><option>Below 6.0</option><option>Not taken yet</option></select>
+            <select id="fIelts"><option value="">Select</option><option value="8.0+">8.0 and above</option><option value="7.0-7.5">7.0 - 7.5</option><option value="6.5">6.5</option><option value="<6.0">Below 6.0</option><option value="Hali yo'q">Not taken yet</option></select>
             <span class="err">Please select your IELTS level</span>
           </div>
           <div class="fld" id="wSat">
@@ -177,7 +177,7 @@ function mark(id, bad){ document.getElementById(id).classList.toggle('bad', bad)
 function grade(a){
   var i = {'8.0+':40,'7.0-7.5':34,'6.5':24,'6.0':16}[a.ingliz] || 0;
   var t = {'1500+':40,'1400-1490':34,'1300-1390':24,'1200-1290':16}[a.sat] || 0;
-  var c = (a.sinf.indexOf('11') === 0 ? 20 : a.sinf.indexOf('10') === 0 ? 18 : a.sinf.indexOf('9') === 0 ? 14 : a.sinf.indexOf('8') === 0 ? 10 : 12);
+  var c = {'11-sinf':20,'10-sinf':18,'9-sinf':14,'8-sinf':10,'Gap year':12}[a.sinf] || 0;
   var s = i + t + c;
   return { score: s, tier: s >= 70 ? 'HOT' : (s >= 40 ? 'WARM' : 'NURTURE') };
 }
