@@ -607,12 +607,10 @@ footer{background:#0B0B0D;color:rgba(255,255,255,0.75);margin-top:auto;}
 
 /* ============================================================
    CONFIG
-   Eski Gmail'dagi Apps Script hozircha ishlaydi — yangi Gmail'ga
-   ko'chirilgach, faqat shu URL yangisiga almashtiriladi.
+   Arizalar to'g'ridan-to'g'ri Apps Script'ga ketadi (ivybekacademy@gmail.com,
+   "IVYBEK Leads" jadvali). Railway serveri o'chirildi, 2026-11-18.
    ============================================================ */
-const ENDPOINT = 'https://api-production-f0f0.up.railway.app/lead';
-/* Zaxira: server 4 soniyada javob bermasa, ariza eski Apps Script'ga ketadi */
-const FALLBACK_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyxUvB4orjFR9_oiuXZSOHrcjC1UZefbe9XQxtGSSIKmE47OIPDdq15dYz7FXLsk52T/exec';
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxe6ImfQl_g8wt3CjE3PdssS2wcAF8JTuxJZ5Bm71pFigF5wur-V_t0II4yBdSjfizUTA/exec';
 const META_PIXEL_ID = '2283622125504650';
 
 /* ============================================================
@@ -775,23 +773,11 @@ function payload(type){
 }
 
 function post(data){
-  const body = JSON.stringify(data);
-  const ctrl = new AbortController();
-  const timer = setTimeout(function(){ ctrl.abort(); }, 4000);
   return fetch(ENDPOINT, {
-    method:'POST',
+    method:'POST', mode:'no-cors',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: body, signal: ctrl.signal, keepalive: true
-  })
-  .then(function(r){ clearTimeout(timer); if(!r.ok) throw new Error('server ' + r.status); return r; })
-  .catch(function(){
-    clearTimeout(timer);
-    return fetch(FALLBACK_ENDPOINT, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: body, keepalive: true
-    }).catch(function(){});
-  });
+    body: JSON.stringify(data), keepalive: true
+  }).catch(function(){});
 }
 
 /* ============================================================
